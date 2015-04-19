@@ -8,6 +8,8 @@ import jadex.bridge.service.search.SServiceProvider;
 import jadex.bridge.service.types.cms.IComponentManagementService;
 import jadex.commons.future.ThreadSuspendable;
 
+import javax.swing.*;
+
 public class UserInterface {
 
     public static void main(String [] args) {
@@ -30,5 +32,18 @@ public class UserInterface {
 
         IComponentIdentifier cid = cms.createComponent("application/EnglishAuction.application.xml", null).getFirstResult(sus);
         System.out.println("CID: "+cid);
+        
+        JFrame window = new JFrame("TNEL - English Auction");
+        JPanel mainPanel = new JPanel(true);
+        JLabel testLabel = new JLabel("Hello World");
+
+        mainPanel.add(testLabel);
+        window.add(mainPanel);
+
+        window.setSize(640, 480);
+        window.setVisible(true);
+        window.setLocationRelativeTo(null);
+        window.validate();
+        window.repaint();
     }
 }
