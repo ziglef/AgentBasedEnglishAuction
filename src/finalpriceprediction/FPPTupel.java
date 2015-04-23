@@ -83,7 +83,7 @@ public class FPPTupel {
         Integer CurrentNOBidders = CurrentRoundArray.get(NUMBER_OF_BIDDERS);
         Integer PastNOBidders = PastRoundArray.get(NUMBER_OF_BIDDERS);
 
-        return (CurrentNOBidders - PastNOBidders) / PastNOBidders * 100;
+        return (CurrentNOBidders - PastNOBidders) / PastNOBidders;
     }
 
     private Integer calculateNumberOfConcurrentAuctions() {
@@ -91,7 +91,7 @@ public class FPPTupel {
         Integer CurrentNOConcurrentAuctions = CurrentRoundArray.get(NUMBER_OF_CONCURRENT_AUCTIONS);
         Integer PastNOConcurrentAuctions = PastRoundArray.get(NUMBER_OF_CONCURRENT_AUCTIONS);
 
-        return (CurrentNOConcurrentAuctions - PastNOConcurrentAuctions) / PastNOConcurrentAuctions * 100;
+        return (CurrentNOConcurrentAuctions - PastNOConcurrentAuctions) / PastNOConcurrentAuctions;
     }
 
     private Integer calculateOpeningBidValue(Integer roundNumber) {
@@ -101,7 +101,7 @@ public class FPPTupel {
             Integer CurrentOpenBidValue = CurrentRoundArray.get(OPENING_BID_VALUE);
             Integer PastOpenBidValue = PastRoundArray.get(OPENING_BID_VALUE);
 
-            return (CurrentOpenBidValue - PastOpenBidValue) / PastOpenBidValue * 100;
+            return (CurrentOpenBidValue - PastOpenBidValue) / PastOpenBidValue;
         }
 
         return 0;
@@ -114,7 +114,7 @@ public class FPPTupel {
             Integer CurrentBidRate = CurrentRoundArray.get(OPENING_BID_VALUE);
             Integer PastBidRate = PastRoundArray.get(OPENING_BID_VALUE);
 
-            return (CurrentBidRate - PastBidRate) / PastBidRate * 100;
+            return (CurrentBidRate - PastBidRate) / PastBidRate;
         }
 
         return 0;
