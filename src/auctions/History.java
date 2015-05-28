@@ -6,11 +6,12 @@ import java.util.List;
 /**
  * Class that represents the price history for a given product
  *
- * @author Rui Grandão  - ei11010@fe.up.pt
- * @author André Silva - ei12133@fe.up.pt
+ * @author Rui Grandï¿½o  - ei11010@fe.up.pt
+ * @author Andrï¿½ Silva - ei12133@fe.up.pt
  *
  */
 public class History {
+
     ////////////////////
     // Private Fields //
     ////////////////////
