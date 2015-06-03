@@ -69,3 +69,6 @@ lib/
 # xmls
 TNEL.settings.xml
 jcc.settings.xml
+
+# jadex cache
+.jadex/hash.cache
