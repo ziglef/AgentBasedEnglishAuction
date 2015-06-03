@@ -1,6 +1,8 @@
 package agents;
 
+
 import gui.UserInterface;
+import auctions.Auction;
 import jadex.bdiv3.BDIAgent;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.annotation.Service;
@@ -33,7 +35,7 @@ import java.util.List;
 public class BidderBDI implements ICommunicationFromAuctionService {
 
     @Agent
-    protected BDIAgent bidder;
+    protected BDIAgent bidderAgent;
 
     protected List<String> auctions;
 
@@ -65,13 +67,13 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
     @AgentBody
     public void body() {
-        bidder.waitForDelay(100).get();
+        bidderAgent.waitForDelay(100).get();
 
         auctions = new ArrayList<>();
         wishlist = new ArrayList<>();
 
         /* PRODUCT TAB - START */
-        JPanel productEditPanel = new JPanel(new GridLayout(5, 1));
+        JPanel productEditPanel = new JPanel(new GridLayout(6, 1));
 
         /* PRODUCT EDIT - START */
         JLabel productNameL = new JLabel("Product name:");
@@ -101,11 +103,20 @@ public class BidderBDI implements ICommunicationFromAuctionService {
             }
         });
 
+        final JButton askAuctionsButton = new JButton("Ask For Auctions");
+        askAuctionsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getAuctionList();
+            }
+        });
+
         productEditPanel.add(productNameL);
         productEditPanel.add(productNames);
         productEditPanel.add(productPriceL);
         productEditPanel.add(productPrice);
         productEditPanel.add(addProductWishlistButton);
+        productEditPanel.add(askAuctionsButton);
 
         /* PRODUCT EDIT - END */
 
@@ -141,7 +152,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         finalPanel.setPreferredSize( new Dimension(600, 475) );
         tabbedPane.setPreferredSize( new Dimension(575, 450) );
         finalPanel.add(tabbedPane);
-        finalPanel.setBorder( BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), bidder.getAgentName() ) );
+        finalPanel.setBorder( BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), bidderAgent.getAgentName() ) );
 
         UserInterface.getInstance().addAgentInterface( finalPanel );
     }
@@ -158,35 +169,6 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
     /* ICommunicationFromAuctionService */
 
-    @Override
-    public void receiveInvitation(String auction, ArrayList<Product> products) {
-
-        if (!auctions.contains(auction)) {
-            System.out.println("Bidder " + bidder.getAgentName() + " received invitation from auction: " + auction);
-
-            boolean auctionWasAdded = false;
-
-            for (Product product : products) {
-                for (WishListProduct wishProduct : wishlist) {
-                    if (wishProduct.getName().equals(product.getName())) {
-
-                        if (checkIfItsWorthItToBuyProduct(product.getStartingPrice(), wishProduct.getDesirePrice())) {
-                            System.out.println("Product: " + product.getName() + " Price: " + product.getStartingPrice());
-                            System.out.println("Adding auction: " + auction);
-                            auctions.add(auction);
-                            auctionWasAdded = true;
-
-                            acceptInvitation(auction);
-                            break;
-                        }
-                    }
-                }
-                if (auctionWasAdded)
-                    break;
-            }
-        }
-    }
-
     private double BOUND = 1.25;
 
     private boolean checkIfItsWorthItToBuyProduct(double price, double desiredPrice) {
@@ -197,14 +179,66 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         return false;
     }
 
+    private void checkIfAuctionHasWishlistProductsAndAddIfYes(String auction, ArrayList<Product> products) {
+        boolean auctionWasAdded = false;
+
+        for (Product product : products) {
+            for (WishListProduct wishProduct : wishlist) {
+                if (wishProduct.getName().equals(product.getName())) {
+
+                    if (checkIfItsWorthItToBuyProduct(product.getStartingPrice(), wishProduct.getDesirePrice())) {
+                        System.out.println("Product: " + product.getName() + " Price: " + product.getStartingPrice());
+                        System.out.println("Adding auction: " + auction);
+                        auctions.add(auction);
+                        auctionWasAdded = true;
+
+                        enterAuction(auction);
+                        break;
+                    }
+                }
+            }
+            if (auctionWasAdded)
+                break;
+        }
+    }
+
+    @Override
+    public void receiveInvitation(String auction, ArrayList<Product> products) {
+
+        if (!auctions.contains(auction)) {
+            System.out.println("Bidder " + bidderAgent.getAgentName() + " received invitation from auction: " + auction);
+
+            checkIfAuctionHasWishlistProductsAndAddIfYes(auction, products);
+        }
+    }
+
+    @Override
+    public void sendAuctionInformation(String bidder, String auction, Auction auctionObject) {
+        if (bidderAgent.getAgentName().equals(bidder)) {
+            System.out.println("Auction " + auction + " is available");
+
+            checkIfAuctionHasWishlistProductsAndAddIfYes(auction, auctionObject.getProducts());
+        }
+    }
+
     /* ICommunicationFromBidderService */
 
-    private void acceptInvitation(final String auction) {
-        SServiceProvider.getServices(bidder.getServiceProvider(), ICommunicationFromBidderService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+    private void enterAuction(final String auction) {
+        SServiceProvider.getServices(bidderAgent.getServiceProvider(), ICommunicationFromBidderService.class, RequiredServiceInfo.SCOPE_PLATFORM)
                 .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromBidderService>()
                 {
                     public void intermediateResultAvailable(ICommunicationFromBidderService ts) {
-                        ts.acceptAuction(bidder.getAgentName(), auction);
+                        ts.acceptAuction(bidderAgent.getAgentName(), auction);
+                    }
+                });
+    }
+
+    private void getAuctionList() {
+        SServiceProvider.getServices(bidderAgent.getServiceProvider(), ICommunicationFromBidderService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+                .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromBidderService>()
+                {
+                    public void intermediateResultAvailable(ICommunicationFromBidderService ts) {
+                        ts.askForAuction(bidderAgent.getAgentName());
                     }
                 });
     }
