@@ -1,7 +1,6 @@
 package agents;
 
 import jadex.bdiv3.BDIAgent;
-import jadex.bdiv3.annotation.Belief;
 import jadex.bridge.service.annotation.Service;
 import jadex.micro.annotation.*;
 import products.Product;
@@ -33,10 +32,31 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
     protected List<String> auctions;
 
-    protected List<Product> wishlist;
+    protected List<WishListProduct> wishlist;
 
     private DefaultTableModel productsTableModel;
-    private Integer productID;
+
+    class WishListProduct {
+
+        private String name;
+        private double desirePrice;
+
+        public WishListProduct(String name) {
+            this.name = name;
+            desirePrice = 0.0;
+        }
+
+        public WishListProduct(String name, double price) {
+            this.name = name;
+            desirePrice = price;
+        }
+
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+
+        public double getDesirePrice() { return desirePrice; }
+        public void setDesirePrice(double desirePrice) { this.desirePrice = desirePrice; }
+    }
 
     @AgentBody
     public void body() {
@@ -44,36 +64,44 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
         auctions = new ArrayList<>();
         wishlist = new ArrayList<>();
-        productID = 0;
 
         JFrame window = new JFrame(bidder.getAgentName());
 
         /* PRODUCT TAB - START */
-        JPanel productEditPanel = new JPanel(new GridLayout(3, 1));
+        JPanel productEditPanel = new JPanel(new GridLayout(5, 1));
 
         /* PRODUCT EDIT - START */
-        final JLabel productNameL = new JLabel("Product name:");
+        JLabel productNameL = new JLabel("Product name:");
 
         final JComboBox<String> productNames = new JComboBox<>();
         for (String pname : Product.PRODUCT_NAMES) {
             productNames.addItem(pname);
         }
 
+        JLabel productPriceL = new JLabel("Product name:");
+        double min = 0.00, value = 0.00, max = Double.MAX_VALUE, stepSize = 0.01;
+
+        SpinnerNumberModel model = new SpinnerNumberModel(value, min, max, stepSize);
+        final JSpinner productPrice = new JSpinner(model);
+
         JButton addProductWishlistButton = new JButton("Add Product Wishlist");
         addProductWishlistButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                String productName = productNames.getSelectedItem().toString();
+                double desiredPrice = (double)productPrice.getValue();
 
-                Product p = new Product(productID, productNames.getSelectedItem().toString());
-                wishlist.add(p);
-                productID++;
-
-                productsTableModel.addRow(new Object[]{p.getID(), p.getName()});
+                if (!wishlistContains(productName, desiredPrice)) {
+                    productsTableModel.addRow(new Object[]{productName, desiredPrice});
+                    wishlist.add(new WishListProduct(productName, desiredPrice));
+                }
             }
         });
 
         productEditPanel.add(productNameL);
         productEditPanel.add(productNames);
+        productEditPanel.add(productPriceL);
+        productEditPanel.add(productPrice);
         productEditPanel.add(addProductWishlistButton);
 
         /* PRODUCT EDIT - END */
@@ -89,8 +117,8 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         };
         JTable productsTable = new JTable(productsTableModel);
 
-        productsTableModel.addColumn("ID");
-        productsTableModel.addColumn("Name");
+        productsTableModel.addColumn("Product");
+        productsTableModel.addColumn("Desired Price");
         /* PRODUCT TABLE - END */
 
         JPanel productPanel = new JPanel(new GridLayout(1, 2));
@@ -114,6 +142,16 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         window.repaint();
     }
 
+    private boolean wishlistContains(String name, double price) {
+
+        for(WishListProduct product : wishlist) {
+            if (name.equals(product.getName()) && product.getDesirePrice() == price)
+                return true;
+        }
+
+        return false;
+    }
+
     @Override
     public void sendInvitations(String auction, ArrayList<Product> products) {
 
@@ -123,7 +161,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
             boolean auctionWasAdded = false;
 
             for (Product product : products) {
-                for (Product wishProduct : wishlist) {
+                for (WishListProduct wishProduct : wishlist) {
                     if (wishProduct.getName().equals(product.getName())) {
 
                         System.out.println("Product: " + product.getName());

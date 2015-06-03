@@ -35,9 +35,7 @@ public class Product {
     }
 
     public Product (Integer ID, String name){
-        this.ID = ID;
-        this.name = name;
-        this.startingPrice = 0;
+        this(ID, name, 0.0);
         this.currentPrice = 0;
         this.desc = "Wishlist Product";
     }
