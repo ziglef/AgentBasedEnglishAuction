@@ -1,44 +1,51 @@
 package gui;
 
-import jadex.bdiv3.BDIAgent;
-import jadex.micro.annotation.Agent;
-import jadex.micro.annotation.AgentBody;
-import jadex.micro.annotation.Description;
+import auctions.Auction;
 import products.Product;
+import services.ICommunicationFromAuctionService;
+
+import jadex.bdiv3.BDIAgent;
+import jadex.bdiv3.annotation.Belief;
+import jadex.bridge.service.RequiredServiceInfo;
+import jadex.bridge.service.search.SServiceProvider;
+import jadex.commons.future.IntermediateDefaultResultListener;
+import jadex.micro.annotation.*;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 @Agent
 @Description("This agent represents an auction interface")
 public class AuctionInterfaceBDI {
 
     @Agent
-    protected BDIAgent auction;
+    protected BDIAgent auctionAgent;
 
-    private DefaultTableModel biddersTableModel;
+    @Belief
+    protected Auction auction;
+
+    private DefaultTableModel productTableModel;
     private Integer productID;
-    private ArrayList<Product> products;
 
 
     @AgentBody
     public void body() {
-        auction.waitForDelay(100).get();
+        auctionAgent.waitForDelay(100).get();
 
         productID = 0;
-        products = new ArrayList<>();
 
-        JFrame window = new JFrame("TNEL - English Auction");
+        auction = new Auction(auctionAgent.getAgentName());
+
+        JFrame window = new JFrame("English Auction");
 
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         JPanel mainPanel = new JPanel(new GridLayout(1, 2));
 
-        biddersTableModel = new DefaultTableModel() {
+        productTableModel = new DefaultTableModel() {
 
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -46,14 +53,15 @@ public class AuctionInterfaceBDI {
                 return false;
             }
         };
-        JTable biddersTable = new JTable(biddersTableModel);
+        JTable biddersTable = new JTable(productTableModel);
 
-        biddersTableModel.addColumn("ID");
-        biddersTableModel.addColumn("Name");
-        biddersTableModel.addColumn("Starting Price");
-        biddersTableModel.addColumn("Description");
+        productTableModel.addColumn("ID");
+        productTableModel.addColumn("Name");
+        productTableModel.addColumn("Starting Price");
+        productTableModel.addColumn("Description");
 
         JButton createProductButton = new JButton("Create Product");
+        JButton sendInvitationsButton = new JButton("Send Invitations");
 
         final JLabel productNameL = new JLabel("Product name:");
         final JComboBox<String> productNames = new JComboBox<>();
@@ -67,7 +75,7 @@ public class AuctionInterfaceBDI {
         final JSpinner productPrice = new JSpinner(model);
 
         for (String pname : Product.PRODUCT_NAMES) {
-            productNames.addItem( pname );
+            productNames.addItem(pname);
         }
 
         createProductButton.addActionListener(new ActionListener() {
@@ -75,10 +83,18 @@ public class AuctionInterfaceBDI {
             public void actionPerformed(ActionEvent e) {
 
                 Product p = new Product(productID, productNames.getSelectedItem().toString(), (double)productPrice.getValue(), productDescription.getText());
-                products.add(p);
+                auction.getProducts().add(p);
                 productID++;
 
-                biddersTableModel.addRow(new Object[]{p.getID(), p.getName(), p.getStartingPrice(), p.getDesc()});
+                productTableModel.addRow(new Object[]{p.getID(), p.getName(), p.getStartingPrice(), p.getDesc()});
+            }
+        });
+
+        sendInvitationsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                sendInvitations();
             }
         });
 
@@ -92,6 +108,7 @@ public class AuctionInterfaceBDI {
         leftPanel.add(productDescriptionL);
         leftPanel.add(productDescription);
         leftPanel.add(createProductButton);
+        leftPanel.add(sendInvitationsButton);
 
         window.add(mainPanel);
         window.setSize(640, 480);
@@ -99,5 +116,15 @@ public class AuctionInterfaceBDI {
         window.setLocationRelativeTo(null);
         window.validate();
         window.repaint();
+    }
+
+    private void sendInvitations() {
+        SServiceProvider.getServices(auctionAgent.getServiceProvider(), ICommunicationFromAuctionService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+                .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromAuctionService>()
+                {
+                    public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
+                        ts.sendInvitations(auctionAgent.getComponentIdentifier().getLocalName(), auction.getProducts());
+                    }
+                });
     }
 }

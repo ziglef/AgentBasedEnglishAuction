@@ -8,7 +8,7 @@ package products;
  *
  */
 public class Product {
-    public static String[] PRODUCT_NAMES = { "MEIAS", "MONITOR", "TECLADO", "RATO", "TAPETE" };
+    public static String[] PRODUCT_NAMES = { "MONITOR", "TECLADO", "RATO", "TAPETE", "TELEMOVEL", "PORTATIL", "HEADSET", "CADEIRA", "MICROFONE"};
     ////////////////////
     // Private Fields //
     ////////////////////
@@ -17,6 +17,7 @@ public class Product {
     private String desc;
 
     private double startingPrice;
+    private double currentPrice;
 
     //////////////////
     // Constructors //
@@ -25,11 +26,20 @@ public class Product {
         this.ID = ID;
         this.name = name;
         this.startingPrice = startingPrice;
+        this.currentPrice = startingPrice;
     }
 
     public Product (Integer ID, String name, double startingPrice, String desc){
         this(ID, name, startingPrice);
         this.desc = desc;
+    }
+
+    public Product (Integer ID, String name){
+        this.ID = ID;
+        this.name = name;
+        this.startingPrice = 0;
+        this.currentPrice = 0;
+        this.desc = "Wishlist Product";
     }
 
     /////////////////////////
@@ -42,7 +52,10 @@ public class Product {
     public void setDesc(String desc) { this.desc = desc; }
 
     public double getStartingPrice() { return startingPrice; }
-    public void setStartingPrice(Float startingPrice) { this.startingPrice = startingPrice; }
+    public void setStartingPrice(double startingPrice) { this.startingPrice = startingPrice; }
+
+    public double getCurrentPrice() { return currentPrice; }
+    public void setCurrentPrice(double currentPrice) { this.currentPrice = currentPrice; }
 
     public Integer getID() { return ID; }
 }

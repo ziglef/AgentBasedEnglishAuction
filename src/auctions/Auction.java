@@ -8,8 +8,8 @@ import java.util.ArrayList;
 /**
  * Class that represents an auction without reputation or a price history
  *
- * @author Rui Grandão  - ei11010@fe.up.pt
- * @author André Silva - ei12133@fe.up.pt
+ * @author Rui Grandï¿½o  - ei11010@fe.up.pt
+ * @author Andrï¿½ Silva - ei12133@fe.up.pt
  *
  */
 public class Auction {
@@ -25,9 +25,19 @@ public class Auction {
     private JPanel gui;
 
     /////////////////
-    // Constructor //
+    // Constructors //
     /////////////////
-    public Auction( String name, ArrayList<Product> products, ArrayList<String> participants ){
+    public Auction(String name) {
+        this.name = name;
+        this.products = new ArrayList<>();
+        this.currentProduct = 0;
+        this.participants = new ArrayList<>();
+
+        this.gui = new JPanel(true);
+        this.initGui();
+    }
+
+    public Auction(String name, ArrayList<Product> products, ArrayList<String> participants ){
         this.name = name;
         this.products = products;
         this.currentProduct = 0;
@@ -54,6 +64,8 @@ public class Auction {
 
     public ArrayList<Product> getProducts() { return products; }
     public Product getProduct(Integer i){ return products.get(i); }
+
+    public void addProduct(Product product) { products.add(product);}
 
     public ArrayList<String> getParticipants() { return participants; }
     public String getParticipant(Integer i){ return participants.get(i); }
