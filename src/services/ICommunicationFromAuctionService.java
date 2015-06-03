@@ -11,5 +11,5 @@ import java.util.ArrayList;
  * @author Rui Grandão
  */
 public interface ICommunicationFromAuctionService {
-    public void sendInvitations(String auction, ArrayList<Product> products);
+    public void receiveInvitation(String auction, ArrayList<Product> products);
 }

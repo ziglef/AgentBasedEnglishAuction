@@ -123,7 +123,7 @@ public class AuctionInterfaceBDI {
                 .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromAuctionService>()
                 {
                     public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
-                        ts.sendInvitations(auctionAgent.getComponentIdentifier().getLocalName(), auction.getProducts());
+                        ts.receiveInvitation(auctionAgent.getComponentIdentifier().getLocalName(), auction.getProducts());
                     }
                 });
     }

@@ -153,7 +153,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
     }
 
     @Override
-    public void sendInvitations(String auction, ArrayList<Product> products) {
+    public void receiveInvitation(String auction, ArrayList<Product> products) {
 
         if (!auctions.contains(auction)) {
             System.out.println("Bidder received invitation from auction: " + auction);
