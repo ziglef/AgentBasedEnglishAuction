@@ -8,9 +8,11 @@ package products;
  *
  */
 public class Product {
+    public static String[] PRODUCT_NAMES = { "MEIAS", "MONITOR", "TECLADO", "RATO", "TAPETE" };
     ////////////////////
     // Private Fields //
     ////////////////////
+    private Integer ID;
     private String name;
     private String desc;
 
@@ -19,13 +21,14 @@ public class Product {
     //////////////////
     // Constructors //
     //////////////////
-    public Product (String name, Float startingPrice){
+    public Product (Integer ID, String name, Float startingPrice){
+        this.ID = ID;
         this.name = name;
         this.startingPrice = startingPrice;
     }
 
-    public Product (String name, Float startingPrice, String desc){
-        this(name, startingPrice);
+    public Product (Integer ID, String name, Float startingPrice, String desc){
+        this(ID, name, startingPrice);
         this.desc = desc;
     }
 
@@ -41,5 +44,6 @@ public class Product {
     public Float getStartingPrice() { return startingPrice; }
     public void setStartingPrice(Float startingPrice) { this.startingPrice = startingPrice; }
 
+    public Integer getID() { return ID; }
 }
 

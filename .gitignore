@@ -65,3 +65,7 @@ hs_err_pid*
 
 # lib folder
 lib/
+
+# xmls
+TNEL.settings.xml
+jcc.settings.xml
