@@ -1,5 +1,6 @@
 package agents;
 
+import gui.UserInterface;
 import jadex.bdiv3.BDIAgent;
 import jadex.bridge.service.annotation.Service;
 import jadex.micro.annotation.*;
@@ -64,8 +65,6 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
         auctions = new ArrayList<>();
         wishlist = new ArrayList<>();
-
-        JFrame window = new JFrame(bidder.getAgentName());
 
         /* PRODUCT TAB - START */
         JPanel productEditPanel = new JPanel(new GridLayout(5, 1));
@@ -134,12 +133,13 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         tabbedPane.add("Products", productPanel);
         tabbedPane.add("Auctions", auctionsPanel);
 
-        window.setContentPane(tabbedPane);
-        window.setSize(640, 480);
-        window.setVisible(true);
-        window.setLocationRelativeTo(null);
-        window.validate();
-        window.repaint();
+        JPanel finalPanel = new JPanel();
+        finalPanel.setPreferredSize( new Dimension(600, 475) );
+        tabbedPane.setPreferredSize( new Dimension(575, 450) );
+        finalPanel.add(tabbedPane);
+        finalPanel.setBorder( BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), bidder.getAgentName() ) );
+
+        UserInterface.getInstance().addAgentInterface( finalPanel );
     }
 
     private boolean wishlistContains(String name, double price) {

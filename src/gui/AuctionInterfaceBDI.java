@@ -39,8 +39,6 @@ public class AuctionInterfaceBDI {
 
         auction = new Auction(auctionAgent.getAgentName());
 
-        JFrame window = new JFrame("English Auction");
-
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         JPanel mainPanel = new JPanel(new GridLayout(1, 2));
@@ -93,13 +91,17 @@ public class AuctionInterfaceBDI {
         sendInvitationsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 sendInvitations();
             }
         });
 
-        mainPanel.add(leftPanel);
-        mainPanel.add(new JScrollPane(biddersTable));
+        mainPanel.setPreferredSize( new Dimension(600, 475) );
+        leftPanel.setPreferredSize( new Dimension(575, 450) );
+        JScrollPane biddersTableScrollable = new JScrollPane( biddersTable );
+        biddersTableScrollable.setPreferredSize( new Dimension(600, 475) );
+
+        mainPanel.add( leftPanel );
+        mainPanel.add( biddersTableScrollable );
 
         leftPanel.add(productNameL);
         leftPanel.add(productNames);
@@ -110,12 +112,8 @@ public class AuctionInterfaceBDI {
         leftPanel.add(createProductButton);
         leftPanel.add(sendInvitationsButton);
 
-        window.add(mainPanel);
-        window.setSize(640, 480);
-        window.setVisible(true);
-        window.setLocationRelativeTo(null);
-        window.validate();
-        window.repaint();
+        mainPanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), auctionAgent.getAgentName()) ) );
+        UserInterface.getInstance().addAuctionInterface( mainPanel );
     }
 
     private void sendInvitations() {

@@ -3,87 +3,70 @@ package gui;
 import jadex.Jadex;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
-public class UserInterface {
+public class UserInterface extends JFrame {
+    private static UserInterface instance;
 
-    private static DefaultTableModel biddersTableModel;
-    private static DefaultTableModel auctionTableModel;
+    private Jadex jadex;
 
-    private static Jadex jadex;
+    private JTabbedPane tabs;
+    private GeneralInterface generalInterface;
+    private JPanel agentsPanel;
+    private JScrollPane agentsScrollablePanel;
+    private JPanel auctionsPanel;
+    private JScrollPane auctionsScrollablePanel;
 
-    public static void main(String [] args) {
+    // Gets the current instance of the user interface or creates it if none exist //
+    public static synchronized UserInterface getInstance(){
+        if( instance == null )
+            instance = new UserInterface();
 
+        return instance;
+    }
+
+    // Constructor called when no user interface exists //
+    private UserInterface() {
+        // Create the JFrame
+        super("TNEL - English Auction");
+        // Create the Jadex platform
         jadex = new Jadex();
 
-        JFrame window = new JFrame("TNEL - English Auction");
-        JPanel mainPanel = new JPanel(new GridLayout(1, 4));
+        // Create the tabbed panel
+        this.tabs = new JTabbedPane();
 
-        biddersTableModel = new DefaultTableModel(){
+        // Create the general interface for the application and at it to its respective tab
+        this.generalInterface = GeneralInterface.getInstance();
+        this.tabs.addTab("General", generalInterface);
 
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                //all cells false
-                return false;
-            }
-        };
-        JTable biddersTable = new JTable(biddersTableModel);
+        // Create the agents panel and add it to the tabs
+        agentsPanel = new JPanel( new GridLayout( 0, 3 ) );
+        agentsScrollablePanel = new JScrollPane( agentsPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+        this.tabs.addTab("Agents", agentsScrollablePanel);
 
-        biddersTableModel.addColumn("ID");
-        biddersTableModel.addColumn("Name");
+        // Create the auctions panel and add it to the tabs
+        auctionsPanel = new JPanel( new GridLayout(0, 3) );
+        auctionsScrollablePanel = new JScrollPane( auctionsPanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+        this.tabs.addTab("Auctions", auctionsScrollablePanel);
 
+        this.add(tabs);
+        this.setSize(1920, 1080);
+        this.setVisible(true);
+        this.setLocationRelativeTo(null);
+        this.setExtendedState(this.getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        this.validate();
+        this.repaint();
+    }
 
-        JButton createBidderButton = new JButton("Create Bidder");
-        createBidderButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (jadex.addNewBidderToApplication(biddersTableModel)) {
-                   System.out.println("Created new bidder");
-                } else {
-                    System.out.println("Failed to create new bidder");
-                }
-            }
-        });
+    public Jadex getJadex() {
+        return jadex;
+    }
 
-        auctionTableModel = new DefaultTableModel(){
+    public void addAgentInterface( JPanel panel ){
+        this.agentsPanel.add( panel );
+    }
 
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                //all cells false
-                return false;
-            }
-        };
-        JTable auctionTable = new JTable(auctionTableModel);
-
-        auctionTableModel.addColumn("ID");
-        auctionTableModel.addColumn("Auction Name");
-
-        JButton createAuctionButton = new JButton("Create Auction");
-        createAuctionButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (jadex.addNewAuctionToApplication(auctionTableModel)) {
-                    System.out.println("Created new auction");
-                } else {
-                    System.out.println("Failed to create new auction");
-                }
-            }
-        });
-
-        mainPanel.add(createBidderButton);
-        mainPanel.add(createAuctionButton);
-        mainPanel.add(new JScrollPane(biddersTable));
-        mainPanel.add(new JScrollPane(auctionTable));
-
-        window.add(mainPanel);
-        window.setSize(1200, 500);
-        window.setVisible(true);
-        window.setLocationRelativeTo(null);
-        window.validate();
-        window.repaint();
+    public void addAuctionInterface( JPanel panel ){
+        this.auctionsPanel.add( panel );
     }
 }
