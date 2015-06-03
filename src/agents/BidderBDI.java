@@ -1,10 +1,14 @@
 package agents;
 
 import jadex.bdiv3.BDIAgent;
+import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.annotation.Service;
+import jadex.bridge.service.search.SServiceProvider;
+import jadex.commons.future.IntermediateDefaultResultListener;
 import jadex.micro.annotation.*;
 import products.Product;
 import services.ICommunicationFromAuctionService;
+import services.ICommunicationFromBidderService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -152,11 +156,13 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         return false;
     }
 
+    /* ICommunicationFromAuctionService */
+
     @Override
     public void receiveInvitation(String auction, ArrayList<Product> products) {
 
         if (!auctions.contains(auction)) {
-            System.out.println("Bidder received invitation from auction: " + auction);
+            System.out.println("Bidder " + bidder.getAgentName() + " received invitation from auction: " + auction);
 
             boolean auctionWasAdded = false;
 
@@ -164,16 +170,42 @@ public class BidderBDI implements ICommunicationFromAuctionService {
                 for (WishListProduct wishProduct : wishlist) {
                     if (wishProduct.getName().equals(product.getName())) {
 
-                        System.out.println("Product: " + product.getName());
-                        System.out.println("Adding auction: " + auction);
-                        auctions.add(auction);
-                        auctionWasAdded = true;
-                        break;
+                        if (checkIfItsWorthItToBuyProduct(product.getStartingPrice(), wishProduct.getDesirePrice())) {
+                            System.out.println("Product: " + product.getName() + " Price: " + product.getStartingPrice());
+                            System.out.println("Adding auction: " + auction);
+                            auctions.add(auction);
+                            auctionWasAdded = true;
+
+                            acceptInvitation(auction);
+                            break;
+                        }
                     }
                 }
                 if (auctionWasAdded)
                     break;
             }
         }
+    }
+
+    private double BOUND = 1.25;
+
+    private boolean checkIfItsWorthItToBuyProduct(double price, double desiredPrice) {
+
+        if (price <= desiredPrice * BOUND)
+            return true;
+
+        return false;
+    }
+
+    /* ICommunicationFromBidderService */
+
+    private void acceptInvitation(final String auction) {
+        SServiceProvider.getServices(bidder.getServiceProvider(), ICommunicationFromBidderService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+                .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromBidderService>()
+                {
+                    public void intermediateResultAvailable(ICommunicationFromBidderService ts) {
+                        ts.acceptAuction(bidder.getAgentName(), auction);
+                    }
+                });
     }
 }

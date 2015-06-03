@@ -1,6 +1,7 @@
 package gui;
 
 import auctions.Auction;
+import jadex.bridge.service.annotation.Service;
 import products.Product;
 import services.ICommunicationFromAuctionService;
 
@@ -10,6 +11,7 @@ import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.search.SServiceProvider;
 import jadex.commons.future.IntermediateDefaultResultListener;
 import jadex.micro.annotation.*;
+import services.ICommunicationFromBidderService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -19,7 +21,9 @@ import java.awt.event.ActionListener;
 
 @Agent
 @Description("This agent represents an auction interface")
-public class AuctionInterfaceBDI {
+@Service
+@ProvidedServices(@ProvidedService(type= ICommunicationFromBidderService.class))
+public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
 
     @Agent
     protected BDIAgent auctionAgent;
@@ -118,13 +122,25 @@ public class AuctionInterfaceBDI {
         window.repaint();
     }
 
+    /* ICommunicationFromAuctionService */
+
     private void sendInvitations() {
         SServiceProvider.getServices(auctionAgent.getServiceProvider(), ICommunicationFromAuctionService.class, RequiredServiceInfo.SCOPE_PLATFORM)
                 .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromAuctionService>()
                 {
                     public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
-                        ts.receiveInvitation(auctionAgent.getComponentIdentifier().getLocalName(), auction.getProducts());
+                        ts.receiveInvitation(auctionAgent.getAgentName(), auction.getProducts());
                     }
                 });
+    }
+
+    /* ICommunicationFromBidderService */
+
+    @Override
+    public void acceptAuction(String bidder, String auctionName) {
+        if (auctionName.equals(auctionAgent.getAgentName())) {
+            System.out.println("Invitation accepted by " + bidder);
+            auction.getParticipants().add(bidder);
+        }
     }
 }
