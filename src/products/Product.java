@@ -3,8 +3,8 @@ package products;
 /**
  * Class that represents a product without any price history
  *
- * @author Rui Grandão  - ei11010@fe.up.pt
- * @author André Silva - ei12133@fe.up.pt
+ * @author Rui Grandï¿½o  - ei11010@fe.up.pt
+ * @author Andrï¿½ Silva - ei12133@fe.up.pt
  *
  */
 public class Product {
@@ -16,18 +16,18 @@ public class Product {
     private String name;
     private String desc;
 
-    private Float startingPrice;
+    private double startingPrice;
 
     //////////////////
     // Constructors //
     //////////////////
-    public Product (Integer ID, String name, Float startingPrice){
+    public Product (Integer ID, String name, double startingPrice){
         this.ID = ID;
         this.name = name;
         this.startingPrice = startingPrice;
     }
 
-    public Product (Integer ID, String name, Float startingPrice, String desc){
+    public Product (Integer ID, String name, double startingPrice, String desc){
         this(ID, name, startingPrice);
         this.desc = desc;
     }
@@ -41,7 +41,7 @@ public class Product {
     public String getDesc() { return desc; }
     public void setDesc(String desc) { this.desc = desc; }
 
-    public Float getStartingPrice() { return startingPrice; }
+    public double getStartingPrice() { return startingPrice; }
     public void setStartingPrice(Float startingPrice) { this.startingPrice = startingPrice; }
 
     public Integer getID() { return ID; }

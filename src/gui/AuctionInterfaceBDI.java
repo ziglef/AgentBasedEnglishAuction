@@ -1,5 +1,7 @@
 package gui;
 
+import jadex.micro.annotation.Agent;
+import jadex.micro.annotation.Description;
 import products.Product;
 
 import javax.swing.*;
@@ -9,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+@Agent
+@Description("This agent represents an auction interface")
 public class AuctionInterfaceBDI {
 
     private DefaultTableModel biddersTableModel;
@@ -16,7 +20,7 @@ public class AuctionInterfaceBDI {
     private ArrayList<Product> products;
 
     public AuctionInterfaceBDI() {
-
+        System.out.println("LOL");
         productID = 0;
         products = new ArrayList<>();
 
@@ -45,10 +49,14 @@ public class AuctionInterfaceBDI {
 
         final JLabel productNameL = new JLabel("Product name:");
         final JComboBox<String> productNames = new JComboBox<>();
-        final JLabel productStartingPriceL = new JLabel("Product starting price:");
-        final JTextField productStartingPrice = new JTextField();
+        final JLabel productPriceL = new JLabel("Product starting price:");
         final JLabel productDescriptionL = new JLabel("Product description:");
         final JTextField productDescription = new JTextField();
+
+        double min = 0.00, value = 0.00, max = Double.MAX_VALUE, stepSize = 0.01;
+
+        SpinnerNumberModel model = new SpinnerNumberModel(value, min, max, stepSize);
+        final JSpinner productPrice = new JSpinner(model);
 
         for( String pname : Product.PRODUCT_NAMES ){
             productNames.addItem( pname );
@@ -58,7 +66,7 @@ public class AuctionInterfaceBDI {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                Product p = new Product(productID, productNames.getSelectedItem().toString(), Float.valueOf(productStartingPrice.getText()), productDescription.getText());
+                Product p = new Product(productID, productNames.getSelectedItem().toString(), (double)productPrice.getValue(), productDescription.getText());
                 products.add(p);
                 productID++;
 
@@ -71,8 +79,8 @@ public class AuctionInterfaceBDI {
 
         leftPanel.add(productNameL);
         leftPanel.add(productNames);
-        leftPanel.add(productStartingPriceL);
-        leftPanel.add(productStartingPrice);
+        leftPanel.add(productPriceL);
+        leftPanel.add(productPrice);
         leftPanel.add(productDescriptionL);
         leftPanel.add(productDescription);
         leftPanel.add(createProductButton);

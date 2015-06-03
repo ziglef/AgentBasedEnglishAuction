@@ -26,13 +26,14 @@ public class Jadex {
     private static IComponentIdentifier applicationIdentifier;
 
     private static List<IComponentIdentifier> bidders = new ArrayList<IComponentIdentifier>();
+    private static List<IComponentIdentifier> auctions = new ArrayList<IComponentIdentifier>();
 
     public Jadex () {
 
         ThreadSuspendable sus = new ThreadSuspendable();
 
         String[] defargs = new String[] {
-                "-gui", "true",
+                "-gui", "false",
                 "-welcome", "false",
                 "-cli", "false",
                 "-printpass", "false",
@@ -56,6 +57,22 @@ public class Jadex {
             IComponentIdentifier agentIdentifier = cms.createComponent("agents/BidderBDI.class", info).getFirstResult(sus);
             bidders.add(agentIdentifier);
             biddersTableModel.addRow(new Object[]{agentIdentifier, agentIdentifier.getLocalName()});
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean addNewAuctionToApplication(DefaultTableModel auctionsTableModel) {
+
+        if (applicationIdentifier != null) {
+            ThreadSuspendable sus = new ThreadSuspendable();
+
+            CreationInfo info = new CreationInfo(applicationIdentifier);
+            IComponentIdentifier agentIdentifier = cms.createComponent("gui/AuctionInterfaceBDI.class", info).getFirstResult(sus);
+            auctions.add(agentIdentifier);
+            auctionsTableModel.addRow(new Object[]{agentIdentifier, agentIdentifier.getLocalName()});
 
             return true;
         }
