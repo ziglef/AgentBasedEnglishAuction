@@ -28,8 +28,6 @@ public class BidderBDI {
 
     @AgentBody
     public void body() {
-        bidder.waitForDelay(1000).get();
-
-        bidder.getComponentIdentifier().getLocalName();
+        bidder.waitForDelay(100).get();
     }
 }

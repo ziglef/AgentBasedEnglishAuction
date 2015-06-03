@@ -1,6 +1,8 @@
 package gui;
 
+import jadex.bdiv3.BDIAgent;
 import jadex.micro.annotation.Agent;
+import jadex.micro.annotation.AgentBody;
 import jadex.micro.annotation.Description;
 import products.Product;
 
@@ -15,12 +17,18 @@ import java.util.ArrayList;
 @Description("This agent represents an auction interface")
 public class AuctionInterfaceBDI {
 
+    @Agent
+    protected BDIAgent auction;
+
     private DefaultTableModel biddersTableModel;
     private Integer productID;
     private ArrayList<Product> products;
 
-    public AuctionInterfaceBDI() {
-        System.out.println("LOL");
+
+    @AgentBody
+    public void body() {
+        auction.waitForDelay(100).get();
+
         productID = 0;
         products = new ArrayList<>();
 
@@ -58,7 +66,7 @@ public class AuctionInterfaceBDI {
         SpinnerNumberModel model = new SpinnerNumberModel(value, min, max, stepSize);
         final JSpinner productPrice = new JSpinner(model);
 
-        for( String pname : Product.PRODUCT_NAMES ){
+        for (String pname : Product.PRODUCT_NAMES) {
             productNames.addItem( pname );
         }
 
