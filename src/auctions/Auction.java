@@ -4,6 +4,7 @@ import products.Product;
 
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Class that represents an auction without reputation or a price history
@@ -24,6 +25,8 @@ public class Auction {
     private ArrayList<String> participants;
     private JPanel gui;
 
+    private int rating;
+
     /////////////////
     // Constructors //
     /////////////////
@@ -32,6 +35,9 @@ public class Auction {
         this.products = new ArrayList<>();
         this.currentProduct = 0;
         this.participants = new ArrayList<>();
+
+        Random r = new Random(1234567890);
+        this.rating = r.nextInt(100);
 
         this.gui = new JPanel(true);
         this.initGui();
@@ -60,6 +66,7 @@ public class Auction {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
+
     public JPanel getGui() { return gui; }
 
     public ArrayList<Product> getProducts() { return products; }
@@ -69,4 +76,7 @@ public class Auction {
 
     public ArrayList<String> getParticipants() { return participants; }
     public String getParticipant(Integer i){ return participants.get(i); }
+
+    public int getRating() { return rating; }
+    public void setRating(int rating) { this.rating = rating; }
 }

@@ -8,4 +8,5 @@ package services;
  */
 public interface ICommunicationFromBidderService {
     public void acceptAuction(String bidder, String auctionName);
+    public void askForAuction(String bidder);
 }

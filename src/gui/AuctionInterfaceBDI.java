@@ -132,6 +132,16 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
                 });
     }
 
+    private void sendAuctionInfo(final String bidder) {
+        SServiceProvider.getServices(auctionAgent.getServiceProvider(), ICommunicationFromAuctionService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+                .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromAuctionService>()
+                {
+                    public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
+                        ts.sendAuctionInformation(bidder, auctionAgent.getAgentName(), auction);
+                    }
+                });
+    }
+
     /* ICommunicationFromBidderService */
 
     @Override
@@ -140,5 +150,11 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
             System.out.println("Invitation accepted by " + bidder);
             auction.getParticipants().add(bidder);
         }
+    }
+
+    @Override
+    public void askForAuction(String bidder) {
+
+        sendAuctionInfo(bidder);
     }
 }
