@@ -153,7 +153,7 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
 
     private void startAuction() {
         // Loop until nao haver mais produtos
-        while( actualProduct < auction.getProducts().size() ) {
+        while( actualProduct < auction.getProducts().size() - 1 ) {
             if( canWeMoveForwardPls ) {
                 // resetar o canWeMoveForwardPls
                 canWeMoveForwardPls = false;
@@ -167,7 +167,7 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
                 t.schedule(ttask, 3000);
                 // Quando receber uma bid, se for valida actualiza preço actual e transmite aos agentes
                 // TODO: fazer um listener para mensagens de bid em que o preço do item actual aumenta e o timer reinicia
-                // reiniciar o timer implica fazer t.cancel e t = new java.Util.Timer(auctionAgent.getAgentName())
+                // reiniciar o timer implica fazer t.cancel() e t = new java.Util.Timer(auctionAgent.getAgentName())
             }
         }
     }
