@@ -64,6 +64,7 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
 
         JButton createProductButton = new JButton("Create Product");
         JButton sendInvitationsButton = new JButton("Send Invitations");
+        JButton startAuction = new JButton("Start Auction");
 
         final JLabel productNameL = new JLabel("Product name:");
         final JComboBox<String> productNames = new JComboBox<>();
@@ -113,10 +114,19 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
         leftPanel.add(productPrice);
         leftPanel.add(productDescriptionL);
         leftPanel.add(productDescription);
-        leftPanel.add(createProductButton);
-        leftPanel.add(sendInvitationsButton);
 
-        mainPanel.setBorder( BorderFactory.createTitledBorder( BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), auctionAgent.getAgentName()) ) );
+        JPanel buttons = new JPanel( new GridLayout( 2, 1 ));
+
+        JPanel buttonGroup1 = new JPanel( new GridLayout( 1, 2 ));
+        buttonGroup1.add(createProductButton);
+        buttonGroup1.add(sendInvitationsButton);
+
+        buttons.add(buttonGroup1);
+        buttons.add(startAuction);
+
+        leftPanel.add(buttons);
+
+        mainPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK), auctionAgent.getAgentName())));
         UserInterface.getInstance().addAuctionInterface( mainPanel );
     }
 
