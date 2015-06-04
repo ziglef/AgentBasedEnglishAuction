@@ -7,6 +7,6 @@ package services;
  * @author Rui Grandão
  */
 public interface ICommunicationFromBidderService {
-    public void acceptAuction(String bidder, String auctionName);
-    public void askForAuction(String bidder);
+    void acceptAuction(String bidder, String auctionName);
+    void askForAuction(String bidder);
 }

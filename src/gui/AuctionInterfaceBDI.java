@@ -26,10 +26,10 @@ import java.awt.event.ActionListener;
 public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
 
     @Agent
-    protected BDIAgent auctionAgent;
+    private BDIAgent auctionAgent;
 
     @Belief
-    protected Auction auction;
+    private Auction auction;
 
     private DefaultTableModel productTableModel;
     private Integer productID;
@@ -85,7 +85,7 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
             public void actionPerformed(ActionEvent e) {
 
                 Product p = new Product(productID, productNames.getSelectedItem().toString(), (double)productPrice.getValue(), productDescription.getText());
-                auction.getProducts().add(p);
+                auction.addProduct(p);
                 productID++;
 
                 productTableModel.addRow(new Object[]{p.getID(), p.getName(), p.getStartingPrice(), p.getDesc()});
@@ -137,7 +137,7 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
                 .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromAuctionService>()
                 {
                     public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
-                        ts.sendAuctionInformation(bidder, auctionAgent.getAgentName(), auction);
+                        ts.receiveAuctionInformation(bidder, auctionAgent.getAgentName(), auction.getProducts());
                     }
                 });
     }

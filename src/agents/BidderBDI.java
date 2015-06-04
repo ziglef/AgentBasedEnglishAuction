@@ -2,7 +2,6 @@ package agents;
 
 
 import gui.UserInterface;
-import auctions.Auction;
 import jadex.bdiv3.BDIAgent;
 import jadex.bridge.service.RequiredServiceInfo;
 import jadex.bridge.service.annotation.Service;
@@ -42,6 +41,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
     protected List<WishListProduct> wishlist;
 
     private DefaultTableModel productsTableModel;
+    private DefaultTableModel auctionsTableModel;
 
     class WishListProduct {
 
@@ -141,12 +141,25 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         /* PRODUCT TAB - END */
 
         /* AUCTION TAB - START */
-        JPanel auctionsPanel = new JPanel(new GridLayout(1, 2));
+        auctionsTableModel = new DefaultTableModel() {
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                //all cells false
+                return false;
+            }
+        };
+
+        auctionsTableModel.addColumn("Name");
+
+        JTable auctionsTable = new JTable(auctionsTableModel);
+        JScrollPane auctionsScrollPanel = new JScrollPane(auctionsTable);
+
         /* AUCTION TAB - END */
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.add("Products", productPanel);
-        tabbedPane.add("Auctions", auctionsPanel);
+        tabbedPane.add("Auctions", auctionsScrollPanel);
 
         JPanel finalPanel = new JPanel();
         finalPanel.setPreferredSize( new Dimension(600, 475) );
@@ -208,16 +221,16 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         if (!auctions.contains(auction)) {
             System.out.println("Bidder " + bidderAgent.getAgentName() + " received invitation from auction: " + auction);
 
-            checkIfAuctionHasWishlistProductsAndAddIfYes(auction, products);
+            checkIfAuctionHasWishlistProductsAndAddIfYes(auction, products );
         }
     }
 
     @Override
-    public void sendAuctionInformation(String bidder, String auction, Auction auctionObject) {
-        if (bidderAgent.getAgentName().equals(bidder)) {
+    public void receiveAuctionInformation(String bidder, String auction, ArrayList<Product> products) {
+        if (bidderAgent.getAgentName().equals(bidder) && !auctions.contains(auction)) {
             System.out.println("Auction " + auction + " is available");
 
-            checkIfAuctionHasWishlistProductsAndAddIfYes(auction, auctionObject.getProducts());
+            checkIfAuctionHasWishlistProductsAndAddIfYes(auction, products );
         }
     }
 
@@ -231,6 +244,8 @@ public class BidderBDI implements ICommunicationFromAuctionService {
                         ts.acceptAuction(bidderAgent.getAgentName(), auction);
                     }
                 });
+
+        auctionsTableModel.addRow(new Object[]{auction});
     }
 
     private void getAuctionList() {
