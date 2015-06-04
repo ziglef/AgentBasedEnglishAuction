@@ -1,5 +1,6 @@
 package tests;
 
+import finalpriceprediction.FPP;
 import finalpriceprediction.FPPTupel;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 public class TestFPPTupel {
 
     public static void main(String[] args) {
-        ArrayList<Integer> pastHistory = new ArrayList<>();
+        /*ArrayList<Integer> pastHistory = new ArrayList<>();
         pastHistory.add(0,12);
         pastHistory.add(1, 12);
         pastHistory.add(2, 1500);
@@ -22,6 +23,9 @@ public class TestFPPTupel {
         FPPTupel tupel = new FPPTupel(2, 10, 1000, 50.0f, pastHistory);
 
 
-        System.out.println("Final Price: " + tupel.getFinalPricePredictionForRound(2, 1500.0f));
+        System.out.println("Final Price: " + tupel.getFinalPricePredictionForRound(2, 1500.0f));*/
+
+        FPP tupel = new FPP();
+        System.out.println("Final Price: " + tupel.calculateFinalPrice(1000, 1000, 10, 700, 800));
     }
 }

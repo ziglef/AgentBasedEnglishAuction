@@ -84,7 +84,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
             productNames.addItem(pname);
         }
 
-        JLabel productPriceL = new JLabel("Product name:");
+        JLabel productPriceL = new JLabel("Product desired price:");
         double min = 0.00, value = 0.00, max = Double.MAX_VALUE, stepSize = 0.01;
 
         SpinnerNumberModel model = new SpinnerNumberModel(value, min, max, stepSize);
@@ -265,7 +265,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
     @Override
     public void receiveNewItemBeingAuctioned(String auction, Product product) {
-        if( wishlistContains(product.getName()) )
+        if( wishlistContains(product.getName()) && auctions.contains(auction))
             sendBidOnProduct(bidderAgent.getAgentName(), product, product.getCurrentPrice()+1);
     }
 
@@ -279,7 +279,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         }
         System.out.println("Product being auctioned: " + product.getName());
 */
-        if( wishlistContains(product.getName()) ){
+        if( wishlistContains(product.getName()) && auctions.contains(auction)){
             for (WishListProduct wlProduct : wishlist) {
                 if (wlProduct.getName().equals(product.getName())) {
                     currentProduct = wlProduct;

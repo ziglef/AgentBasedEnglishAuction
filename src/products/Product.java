@@ -8,7 +8,7 @@ package products;
  *
  */
 public class Product {
-    public static String[] PRODUCT_NAMES = { "MONITOR", "TECLADO", "RATO", "TAPETE", "TELEMOVEL", "PORTATIL", "HEADSET", "CADEIRA", "MICROFONE"};
+    public static String[] PRODUCT_NAMES = { "MONITOR", "KEYBOARD", "MOUSE", "MOUSEPAD", "SMARTPHONE", "LAPTOP", "HEADSET", "CHAIR", "MICROPHONE", "DESKTOP"};
     ////////////////////
     // Private Fields //
     ////////////////////
