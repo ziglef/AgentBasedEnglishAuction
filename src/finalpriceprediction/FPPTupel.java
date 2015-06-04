@@ -1,6 +1,8 @@
 package finalpriceprediction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created on 19/04/15.
@@ -19,104 +21,114 @@ public class FPPTupel {
     final Integer REPUTATION_RELIABILITY_AUCTION_SITE = 4;
 
     /* Belief Set Of Current Round Of Relevant Auction (PHI) */
-    protected ArrayList<Integer> CurrentRoundArray = new ArrayList<Integer>(4);
+    protected ArrayList<Integer> currentRoundArray = new ArrayList<>(4);
 
     /* Belief Set Of Past Round Of Relevant Auction (OMEGA) */
-    protected ArrayList<Integer> PastRoundArray = new ArrayList<Integer>(4);
+    protected ArrayList<Integer> pastRoundArray = new ArrayList<>(4);
 
     /* Belief Set Obtained By The Average Past Closed Auctions In The Same Auction Site (ETA) */
     //protected ArrayList<Integer> AvgPastClosedAuctionsArray = new ArrayList<Integer>(4);
 
     /* Plan Set Affection */
-    protected ArrayList<Integer> PlanArray = new ArrayList<Integer>(5);
+    protected Map<Integer, Float> planArray = new HashMap<>(5);
 
 
     /* Constructors */
-    public FPPTupel(Integer numberOfBidders, Integer numberOfConcurrentAuctions, Integer openingBidValue, Integer bidRate, Integer auctionSiteReputation) {
+    public FPPTupel(Integer numberOfBidders, Integer numberOfConcurrentAuctions, Integer openingBidValue, Float auctionSiteReputation) {
 
-        CurrentRoundArray.add(NUMBER_OF_BIDDERS, numberOfBidders);
-        CurrentRoundArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, numberOfConcurrentAuctions);
-        CurrentRoundArray.add(OPENING_BID_VALUE, openingBidValue);
-        CurrentRoundArray.add(BID_RATE, bidRate);
+        currentRoundArray.add(NUMBER_OF_BIDDERS, numberOfBidders);
+        currentRoundArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, numberOfConcurrentAuctions);
+        currentRoundArray.add(OPENING_BID_VALUE, openingBidValue);
+        currentRoundArray.add(BID_RATE, 0);
 
-        PastRoundArray.add(NUMBER_OF_BIDDERS, numberOfBidders);
-        PastRoundArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, numberOfConcurrentAuctions);
-        PastRoundArray.add(OPENING_BID_VALUE, openingBidValue);
-        PastRoundArray.add(BID_RATE, bidRate);
+        pastRoundArray.add(NUMBER_OF_BIDDERS, numberOfBidders);
+        pastRoundArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, numberOfConcurrentAuctions);
+        pastRoundArray.add(OPENING_BID_VALUE, openingBidValue);
+        pastRoundArray.add(BID_RATE, 0);
 
         computePlans(auctionSiteReputation, 1);
     }
 
-    public FPPTupel(Integer numberOfBidders, Integer numberOfConcurrentAuctions, Integer openingBidValue, Integer bidRate, Integer auctionSiteReputation, ArrayList<Integer> AvgPastClosedAuctionsArray) {
+    public FPPTupel(Integer numberOfBidders, Integer numberOfConcurrentAuctions, Integer openingBidValue, Float auctionSiteReputation, ArrayList<Integer> AvgPastClosedAuctionsArray) {
 
-        CurrentRoundArray.add(NUMBER_OF_BIDDERS, numberOfBidders);
-        CurrentRoundArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, numberOfConcurrentAuctions);
-        CurrentRoundArray.add(OPENING_BID_VALUE, openingBidValue);
-        CurrentRoundArray.add(BID_RATE, bidRate);
+        currentRoundArray.add(NUMBER_OF_BIDDERS, numberOfBidders);
+        currentRoundArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, numberOfConcurrentAuctions);
+        currentRoundArray.add(OPENING_BID_VALUE, openingBidValue);
+        currentRoundArray.add(BID_RATE, AvgPastClosedAuctionsArray.get(BID_RATE));
 
-        PastRoundArray.add(NUMBER_OF_BIDDERS, AvgPastClosedAuctionsArray.get(NUMBER_OF_BIDDERS));
-        PastRoundArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, AvgPastClosedAuctionsArray.get(NUMBER_OF_CONCURRENT_AUCTIONS));
-        PastRoundArray.add(OPENING_BID_VALUE, AvgPastClosedAuctionsArray.get(OPENING_BID_VALUE));
-        PastRoundArray.add(BID_RATE, AvgPastClosedAuctionsArray.get(BID_RATE));
+        pastRoundArray.add(NUMBER_OF_BIDDERS, AvgPastClosedAuctionsArray.get(NUMBER_OF_BIDDERS));
+        pastRoundArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, AvgPastClosedAuctionsArray.get(NUMBER_OF_CONCURRENT_AUCTIONS));
+        pastRoundArray.add(OPENING_BID_VALUE, AvgPastClosedAuctionsArray.get(OPENING_BID_VALUE));
+        pastRoundArray.add(BID_RATE, AvgPastClosedAuctionsArray.get(BID_RATE));
 
         computePlans(auctionSiteReputation, 1);
     }
 
 
     /* Methods */
-    private void computePlans(Integer auctionSiteReputation, Integer roundNumber) {
+    private void computePlans(Float auctionSiteReputation, Integer roundNumber) {
 
+        planArray.put(REPUTATION_RELIABILITY_AUCTION_SITE, auctionSiteReputation);
         updatePlans(roundNumber);
-        PlanArray.add(REPUTATION_RELIABILITY_AUCTION_SITE, auctionSiteReputation);
     }
 
     private void updatePlans(Integer roundNumber) {
 
-        PlanArray.add(NUMBER_OF_BIDDERS, calculateNumberOfBidders());
-        PlanArray.add(NUMBER_OF_CONCURRENT_AUCTIONS, calculateNumberOfConcurrentAuctions());
-        PlanArray.add(OPENING_BID_VALUE, calculateOpeningBidValue(roundNumber));
-        PlanArray.add(BID_RATE, calculateBidRate(roundNumber));
+        planArray.put(NUMBER_OF_BIDDERS, calculateNumberOfBidders());
+        planArray.put(NUMBER_OF_CONCURRENT_AUCTIONS, calculateNumberOfConcurrentAuctions());
+        planArray.put(OPENING_BID_VALUE, calculateOpeningBidValue(roundNumber));
+        planArray.put(BID_RATE, calculateBidRate(roundNumber));
     }
 
-    private Integer calculateNumberOfBidders() {
+    private Float calculateNumberOfBidders() {
 
-        Integer CurrentNOBidders = CurrentRoundArray.get(NUMBER_OF_BIDDERS);
-        Integer PastNOBidders = PastRoundArray.get(NUMBER_OF_BIDDERS);
+        Integer currentNOBidders = currentRoundArray.get(NUMBER_OF_BIDDERS);
+        Integer pastNOBidders = pastRoundArray.get(NUMBER_OF_BIDDERS);
 
-        return (CurrentNOBidders - PastNOBidders) / PastNOBidders;
+        return (float)(currentNOBidders - pastNOBidders) / pastNOBidders;
     }
 
-    private Integer calculateNumberOfConcurrentAuctions() {
+    private Float calculateNumberOfConcurrentAuctions() {
 
-        Integer CurrentNOConcurrentAuctions = CurrentRoundArray.get(NUMBER_OF_CONCURRENT_AUCTIONS);
-        Integer PastNOConcurrentAuctions = PastRoundArray.get(NUMBER_OF_CONCURRENT_AUCTIONS);
+        Integer currentNOConcurrentAuctions = currentRoundArray.get(NUMBER_OF_CONCURRENT_AUCTIONS);
+        Integer pastNOConcurrentAuctions = pastRoundArray.get(NUMBER_OF_CONCURRENT_AUCTIONS);
 
-        return (CurrentNOConcurrentAuctions - PastNOConcurrentAuctions) / PastNOConcurrentAuctions;
+        return (float)(currentNOConcurrentAuctions - pastNOConcurrentAuctions) / pastNOConcurrentAuctions;
     }
 
-    private Integer calculateOpeningBidValue(Integer roundNumber) {
+    private Float calculateOpeningBidValue(Integer roundNumber) {
 
         if (roundNumber == 1) {
 
-            Integer CurrentOpenBidValue = CurrentRoundArray.get(OPENING_BID_VALUE);
-            Integer PastOpenBidValue = PastRoundArray.get(OPENING_BID_VALUE);
+            Integer currentOpenBidValue = currentRoundArray.get(OPENING_BID_VALUE);
+            Integer pastOpenBidValue = pastRoundArray.get(OPENING_BID_VALUE);
 
-            return (CurrentOpenBidValue - PastOpenBidValue) / PastOpenBidValue;
+            return (float)(currentOpenBidValue - pastOpenBidValue) / pastOpenBidValue;
         }
 
-        return 0;
+        return 0.0f;
     }
 
-    private Integer calculateBidRate(Integer roundNumber) {
+    private Float calculateBidRate(Integer roundNumber) {
 
         if (roundNumber > 1) {
 
-            Integer CurrentBidRate = CurrentRoundArray.get(OPENING_BID_VALUE);
-            Integer PastBidRate = PastRoundArray.get(OPENING_BID_VALUE);
+            Integer currentBidRate = currentRoundArray.get(OPENING_BID_VALUE);
+            Integer pastBidRate = pastRoundArray.get(OPENING_BID_VALUE);
 
-            return (CurrentBidRate - PastBidRate) / PastBidRate;
+            return (float)(currentBidRate - pastBidRate) / pastBidRate;
         }
 
-        return 0;
+        return 0.0f;
+    }
+
+    public Float getFinalPricePredictionForRound(Integer roundNumber, Float averageFinalPrice) {
+        updatePlans(roundNumber);
+
+        return averageFinalPrice + planArray.get(NUMBER_OF_BIDDERS) * averageFinalPrice
+                                    - planArray.get(NUMBER_OF_CONCURRENT_AUCTIONS) * averageFinalPrice
+                                        + planArray.get(OPENING_BID_VALUE) * averageFinalPrice
+                                            + planArray.get(BID_RATE) * averageFinalPrice
+                                                + planArray.get(REPUTATION_RELIABILITY_AUCTION_SITE) * averageFinalPrice;
     }
 }
