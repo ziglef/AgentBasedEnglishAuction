@@ -20,7 +20,7 @@ public class GeneralInterface extends JPanel{
     }
 
     private GeneralInterface() {
-        super(new GridLayout(1, 4));
+        super(new GridLayout(1, 3));
 
         biddersTableModel = new DefaultTableModel() {
 
@@ -56,7 +56,7 @@ public class GeneralInterface extends JPanel{
                 return false;
             }
         };
-        JTable auctionTable = new JTable(auctionTableModel);
+        JTable auctionsTable = new JTable(auctionTableModel);
 
         auctionTableModel.addColumn("ID");
         auctionTableModel.addColumn("Auction Name");
@@ -73,15 +73,37 @@ public class GeneralInterface extends JPanel{
             }
         });
 
+        JPanel leftPanel = new JPanel( new GridLayout(2, 1));
+
         JPanel bidderButtonPanel = new JPanel();
         bidderButtonPanel.add( createBidderButton );
-        this.add(bidderButtonPanel);
-
         JPanel auctionButtonPanel = new JPanel();
-        bidderButtonPanel.add( createAuctionButton );
-        this.add(auctionButtonPanel);
+        auctionButtonPanel.add( createAuctionButton );
 
-        this.add(new JScrollPane(biddersTable));
-        this.add(new JScrollPane(auctionTable));
+        JLabel auctionImage = new JLabel(new ImageIcon("assets/auction.jpg"));
+        auctionImage.setPreferredSize( new Dimension( 700, 706 ));
+
+        JPanel buttonsPanel = new JPanel( new GridLayout(1, 2) );
+        buttonsPanel.add(bidderButtonPanel);
+        buttonsPanel.add(auctionButtonPanel);
+
+        leftPanel.add( auctionImage );
+        leftPanel.add( buttonsPanel );
+
+        JScrollPane biddersScrollPane = new JScrollPane(biddersTable);
+        JScrollPane auctionsScrollTable = new JScrollPane(auctionsTable);
+
+        biddersScrollPane.setPreferredSize( new Dimension( 500, 900 ));
+        auctionsScrollTable.setPreferredSize( new Dimension( 500, 900 ));
+
+        JPanel centerLeftPanel = new JPanel( new FlowLayout( FlowLayout.CENTER ));
+        JLabel dummy = new JLabel();
+        dummy.setPreferredSize( new Dimension(700, 115) );
+        centerLeftPanel.add( dummy );
+        centerLeftPanel.add(leftPanel);
+
+        this.add( centerLeftPanel );
+        this.add( biddersScrollPane );
+        this.add( auctionsScrollTable );
     }
 }
