@@ -42,6 +42,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
     private DefaultTableModel productsTableModel;
     private DefaultTableModel auctionsTableModel;
+    private DefaultTableModel productsWonTableModel;
 
     class WishListProduct {
 
@@ -151,15 +152,33 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         };
 
         auctionsTableModel.addColumn("Name");
+        /* AUCTION TAB - END */
+
+                /* AUCTION TAB - START */
+        productsWonTableModel = new DefaultTableModel() {
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                //all cells false
+                return false;
+            }
+        };
+
+        productsWonTableModel.addColumn("Auction");
+        productsWonTableModel.addColumn("Name");
+        productsWonTableModel.addColumn("Price");
+        /* AUCTION TAB - END */
 
         JTable auctionsTable = new JTable(auctionsTableModel);
         JScrollPane auctionsScrollPanel = new JScrollPane(auctionsTable);
 
-        /* AUCTION TAB - END */
+        JTable productsWonTable = new JTable(productsWonTableModel);
+        JScrollPane productsScrollPanel = new JScrollPane(productsWonTable);
 
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.add("Products", productPanel);
         tabbedPane.add("Auctions", auctionsScrollPanel);
+        tabbedPane.add("Products Bought", productsScrollPanel);
 
         JPanel finalPanel = new JPanel();
         finalPanel.setPreferredSize( new Dimension(600, 475) );
@@ -174,6 +193,16 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
         for(WishListProduct product : wishlist) {
             if (name.equals(product.getName()) && product.getDesirePrice() == price)
+                return true;
+        }
+
+        return false;
+    }
+
+    private boolean wishlistContains(String name) {
+
+        for(WishListProduct product : wishlist) {
+            if (name.equals(product.getName()))
                 return true;
         }
 
@@ -232,6 +261,51 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
             checkIfAuctionHasWishlistProductsAndAddIfYes(auction, products );
         }
+    }
+
+    @Override
+    public void receiveNewItemBeingAuctioned(String auction, Product product) {
+        if( wishlistContains(product.getName()) )
+            sendBidOnProduct(bidderAgent.getAgentName(), product, product.getCurrentPrice()+1);
+    }
+
+    @Override
+    public void receiveNewPrice(String auction, Product product) {
+        WishListProduct currentProduct = null;
+/*
+        System.out.println("Wishlist:");
+        for (WishListProduct wishProduct : wishlist) {
+            System.out.println("Product: " + wishProduct.getName());
+        }
+        System.out.println("Product being auctioned: " + product.getName());
+*/
+        if( wishlistContains(product.getName()) ){
+            for (WishListProduct wlProduct : wishlist) {
+                if (wlProduct.getName().equals(product.getName())) {
+                    currentProduct = wlProduct;
+                    break;
+                }
+            }
+            if (!product.getCurrentBidder().equals(bidderAgent.getAgentName()) && checkIfItsWorthItToBuyProduct(product.getCurrentPrice(), currentProduct.getDesirePrice()))
+                sendBidOnProduct(bidderAgent.getAgentName(), product, product.getCurrentPrice()+1);
+        }
+    }
+
+    @Override
+    public void receiveWinNotification(String auction, String bidder, String product, double value) {
+        if( bidder.equals(bidderAgent.getAgentName()) ){
+            productsWonTableModel.addRow(new Object[]{auction, product, String.valueOf(value)});
+        }
+    }
+
+    private void sendBidOnProduct(String agentName, final Product product, final double bid) {
+        SServiceProvider.getServices(bidderAgent.getServiceProvider(), ICommunicationFromBidderService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+                .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromBidderService>()
+                {
+                    public void intermediateResultAvailable(ICommunicationFromBidderService ts) {
+                        ts.receiveBidOnProduct(bidderAgent.getAgentName(), product, bid);
+                    }
+                });
     }
 
     /* ICommunicationFromBidderService */

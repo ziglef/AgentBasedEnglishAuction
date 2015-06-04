@@ -1,5 +1,7 @@
 package services;
 
+import products.Product;
+
 /**
  * Created on 03/06/15.
  *
@@ -9,4 +11,5 @@ package services;
 public interface ICommunicationFromBidderService {
     void acceptAuction(String bidder, String auctionName);
     void askForAuction(String bidder);
+    void receiveBidOnProduct(String bidder, Product product, Double value);
 }

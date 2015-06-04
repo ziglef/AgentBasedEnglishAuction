@@ -71,6 +71,13 @@ public class Auction {
 
     public ArrayList<Product> getProducts() { return products; }
     public Product getProduct(Integer i){ return products.get(i); }
+    public Product getProduct(Product p){
+        for( Product tmpP : products ){
+            if( tmpP.getName().equals(p.getName()) )
+                return tmpP;
+        }
+        return null;
+    }
 
     public void addProduct(Product product) { products.add(product);}
 

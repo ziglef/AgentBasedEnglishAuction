@@ -13,4 +13,7 @@ import java.util.ArrayList;
 public interface ICommunicationFromAuctionService {
     void receiveInvitation(String auction, ArrayList<Product> products);
     void receiveAuctionInformation(String bidder, String auction, ArrayList<Product> products);
+    void receiveNewItemBeingAuctioned(String auction, Product product);
+    void receiveNewPrice(String auction, Product product);
+    void receiveWinNotification(String auction, String bidder, String product, double value);
 }

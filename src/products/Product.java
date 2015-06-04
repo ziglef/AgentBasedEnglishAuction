@@ -15,6 +15,7 @@ public class Product {
     private Integer ID;
     private String name;
     private String desc;
+    private String currentBidder;
 
     private double startingPrice;
     private double currentPrice;
@@ -27,6 +28,7 @@ public class Product {
         this.name = name;
         this.startingPrice = startingPrice;
         this.currentPrice = startingPrice;
+        this.currentBidder = "";
     }
 
     public Product (Integer ID, String name, double startingPrice, String desc){
@@ -56,5 +58,8 @@ public class Product {
     public void setCurrentPrice(double currentPrice) { this.currentPrice = currentPrice; }
 
     public Integer getID() { return ID; }
+
+    public String getCurrentBidder() { return currentBidder; }
+    public void setCurrentBidder(String currentBidder) { this.currentBidder = currentBidder; }
 }
 

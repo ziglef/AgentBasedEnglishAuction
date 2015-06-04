@@ -17,7 +17,9 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Agent
 @Description("This agent represents an auction interface")
@@ -35,23 +37,29 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
     private Integer productID;
 
     private int actualProduct;
-    private boolean canWeMoveForwardPls;
-    private java.util.Timer t;
-    TimerTask ttask;
 
+    private static final ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
+    private Runnable task;
 
     @AgentBody
     public void body() {
         auctionAgent.waitForDelay(100).get();
 
         productID = 0;
-        actualProduct = -1;
-        canWeMoveForwardPls = true;
-        t = new java.util.Timer(auctionAgent.getAgentName());
-        ttask = new TimerTask() {
-            @Override
+        actualProduct = 0;
+        task = new Runnable() {
             public void run() {
-                canWeMoveForwardPls = true;
+                System.out.println("Acabou o leilao para o produto " + auction.getProduct(actualProduct).getName() +
+                        " com um preco final de " + auction.getProduct(actualProduct).getCurrentPrice() +
+                        " e foi ganho pelo agente " + auction.getProduct(actualProduct).getCurrentBidder());
+
+                sendYouWonMessage(auction.getProduct(actualProduct).getCurrentBidder(), auction.getProduct(actualProduct).getName(), auction.getProduct(actualProduct).getCurrentPrice() );
+
+                actualProduct++;
+                if( actualProduct < auction.getProducts().size() )
+                    startAuction();
+                else
+                    System.out.println("Todos os productos do leilao " + auction.getName() + " foram leiloados.");
             }
         };
 
@@ -152,32 +160,37 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
     }
 
     private void startAuction() {
-        // Loop until nao haver mais produtos
-        while( actualProduct < auction.getProducts().size() - 1 ) {
-            if( canWeMoveForwardPls ) {
-                // resetar o canWeMoveForwardPls
-                canWeMoveForwardPls = false;
+        // Avisar os agentes que existe um novo item a ser licitado
+        sendNewItemBeingAuctioned();
 
-                // Pegar num item e definir como item actual
-                actualProduct++;
-                // Avisar os agentes que existe um novo item a ser licitado
-                warnNewItemBeingAuctioned(auction.getProduct(actualProduct));
-                // Definir timeout
-                // Quando nao houver mais bids durante o tempo do timeout o producto actual acaba e leiloa-se o proximo
-                t.schedule(ttask, 3000);
-                // Quando receber uma bid, se for valida actualiza preço actual e transmite aos agentes
-                // TODO: fazer um listener para mensagens de bid em que o preço do item actual aumenta e o timer reinicia
-                // reiniciar o timer implica fazer t.cancel() e t = new java.Util.Timer(auctionAgent.getAgentName())
-            }
-        }
-    }
-
-    // TODO: send message to agents
-    private void warnNewItemBeingAuctioned(Product product) {
-
+        // Definir timeout
+        worker.schedule(task, 3, TimeUnit.SECONDS);
+        // Quando nao houver mais bids durante o tempo do timeout o producto actual acaba e leiloa-se o proximo
+        // Quando receber uma bid, se for valida actualiza preço actual e transmite aos agentes
     }
 
     /* ICommunicationFromAuctionService */
+    private void sendNewItemBeingAuctioned() {
+        SServiceProvider.getServices(auctionAgent.getServiceProvider(), ICommunicationFromAuctionService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+                .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromAuctionService>()
+                {
+                    public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
+                        System.out.println("Sending to all agents a notification stating that " + auction.getProduct(actualProduct).getName() + " is now being auctioned!");
+                        ts.receiveNewItemBeingAuctioned(auctionAgent.getAgentName(), auction.getProduct(actualProduct));
+                    }
+                });
+    }
+
+    private void sendNewPriceNotification(final Product product) {
+        SServiceProvider.getServices(auctionAgent.getServiceProvider(), ICommunicationFromAuctionService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+                .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromAuctionService>()
+                {
+                    public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
+                        System.out.println("Sending to all agents a notification stating that " + auction.getProduct(actualProduct).getName() + " has had its price changed!");
+                        ts.receiveNewPrice(auctionAgent.getAgentName(), product);
+                    }
+                });
+    }
 
     private void sendInvitations() {
         SServiceProvider.getServices(auctionAgent.getServiceProvider(), ICommunicationFromAuctionService.class, RequiredServiceInfo.SCOPE_PLATFORM)
@@ -199,6 +212,16 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
                 });
     }
 
+    private void sendYouWonMessage(final String currentBidder, final String productName, final double currentPrice) {
+        SServiceProvider.getServices(auctionAgent.getServiceProvider(), ICommunicationFromAuctionService.class, RequiredServiceInfo.SCOPE_PLATFORM)
+                .addResultListener(new IntermediateDefaultResultListener<ICommunicationFromAuctionService>()
+                {
+                    public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
+                        ts.receiveWinNotification(auctionAgent.getAgentName(), currentBidder, productName, currentPrice);
+                    }
+                });
+    }
+
     /* ICommunicationFromBidderService */
 
     @Override
@@ -211,7 +234,21 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
 
     @Override
     public void askForAuction(String bidder) {
-
         sendAuctionInfo(bidder);
+    }
+
+    @Override
+    public void receiveBidOnProduct(String bidder, Product product, Double value) {
+        System.out.println("Received a bid from agent: " + bidder);
+        System.out.println("He placed a bid on product " + product.getName() + " for " + value + ".");
+        System.out.println("Current value for " + product.getName() + " is " + product.getCurrentPrice() + ".");
+        System.out.println("Current bidder for " + product.getName() + " is " + product.getCurrentBidder() + ".");
+
+        if( value > auction.getProduct(product).getCurrentPrice() ) {
+            auction.getProduct(product).setCurrentPrice(value);
+            auction.getProduct(product).setCurrentBidder(bidder);
+
+            sendNewPriceNotification(auction.getProduct(product));
+        }
     }
 }

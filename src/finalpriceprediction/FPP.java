@@ -15,6 +15,6 @@ public class FPP {
 
     private Integer calculateAlpha(Integer averageNumberOfBidders) {
 
-
+        return null;
     }
 }
