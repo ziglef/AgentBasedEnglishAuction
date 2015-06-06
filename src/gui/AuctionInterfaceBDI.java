@@ -17,6 +17,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,7 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
                         " e foi ganho pelo agente " + auction.getProduct(actualProduct).getCurrentBidder());
 
                 sendYouWonMessage(auction.getProduct(actualProduct).getCurrentBidder(), auction.getProduct(actualProduct).getName(), auction.getProduct(actualProduct).getCurrentPrice() );
+                auction.addProductSold(auction.getProduct(actualProduct));
 
                 actualProduct++;
                 if( actualProduct < auction.getProducts().size() )
@@ -166,7 +168,7 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
         // Definir timeout
         worker.schedule(task, 3, TimeUnit.SECONDS);
         // Quando nao houver mais bids durante o tempo do timeout o producto actual acaba e leiloa-se o proximo
-        // Quando receber uma bid, se for valida actualiza preço actual e transmite aos agentes
+        // Quando receber uma bid, se for valida actualiza preï¿½o actual e transmite aos agentes
     }
 
     /* ICommunicationFromAuctionService */

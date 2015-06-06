@@ -20,7 +20,7 @@ public class Auction {
     private String name;
 
     private ArrayList<Product> products;
-    private int currentProduct;
+    private ArrayList<Product> productsSold;
 
     private ArrayList<String> participants;
     private JPanel gui;
@@ -33,7 +33,7 @@ public class Auction {
     public Auction(String name) {
         this.name = name;
         this.products = new ArrayList<>();
-        this.currentProduct = 0;
+        this.productsSold = new ArrayList<>();
         this.participants = new ArrayList<>();
 
         Random r = new Random(1234567890);
@@ -46,7 +46,7 @@ public class Auction {
     public Auction(String name, ArrayList<Product> products, ArrayList<String> participants ){
         this.name = name;
         this.products = products;
-        this.currentProduct = 0;
+        this.productsSold = new ArrayList<>();
         this.participants = participants;
 
         this.gui = new JPanel(true);
@@ -80,6 +80,19 @@ public class Auction {
     }
 
     public void addProduct(Product product) { products.add(product);}
+
+
+    public ArrayList<Product> getProductsSold() { return productsSold; }
+    public Product getProductSold(Integer i){ return productsSold.get(i); }
+    public Product getProductSold(Product p){
+        for( Product tmpP : productsSold ){
+            if( tmpP.getName().equals(p.getName()) )
+                return tmpP;
+        }
+        return null;
+    }
+
+    public void addProductSold(Product product) { productsSold.add(product);}
 
     public ArrayList<String> getParticipants() { return participants; }
     public String getParticipant(Integer i){ return participants.get(i); }
