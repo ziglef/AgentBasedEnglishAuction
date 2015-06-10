@@ -10,8 +10,8 @@ import org.apache.xpath.SourceTree;
  *
  * alpha = MIN(AvgNumberOfBidders/10, 1) * 0.15
  * beta = MIN(AvgNumberOfConcurrentAuctions/10, 1) * (-0.15)
- *
- * fp = avp + alpha + beta + (asp - sp) * 0.7
+ * gamma = (asp - sp) * 0.7
+ * fp = avp + alpha * avp + beta * avp + gamma
  *
  */
 
@@ -26,11 +26,11 @@ public class FPP {
     }
 
     Integer betaBound = 10;
-    double betaWeight = -0.15;
+    double betaWeight = 0.15;
     private double calculateBeta(double averageNumberOfConcurrentAuctions) {
 
         System.out.println(Math.min(averageNumberOfConcurrentAuctions/betaBound, 1) * betaWeight);
-        return Math.min(averageNumberOfConcurrentAuctions/betaBound, 1) * betaWeight;
+        return Math.min(averageNumberOfConcurrentAuctions/betaBound, 1) * -betaWeight;
     }
 
     double startPriceWeight = 0.6;
