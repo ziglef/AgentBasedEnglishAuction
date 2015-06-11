@@ -41,6 +41,6 @@ public class FPP {
     }
 
     public double calculateFinalPrice(double averageFinalPrice, double averageNumberOfBidders, double averageNumberOfConcurrentAuctions, double averageStartingPrice, double startingPrice) {
-        return averageFinalPrice + averageFinalPrice * calculateAlpha(averageNumberOfBidders) + averageFinalPrice * calculateBeta(averageNumberOfConcurrentAuctions) + calculateGama(averageStartingPrice, startingPrice);
+        return Math.max(averageFinalPrice, startingPrice) + averageFinalPrice * calculateAlpha(averageNumberOfBidders) + averageFinalPrice * calculateBeta(averageNumberOfConcurrentAuctions) + calculateGama(averageStartingPrice, startingPrice);
     }
 }
