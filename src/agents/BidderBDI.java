@@ -16,12 +16,10 @@ import services.ICommunicationFromBidderService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -103,11 +101,11 @@ public class BidderBDI implements ICommunicationFromAuctionService {
             for( WishListProduct p : wishlist ){
                 Double avgFinalPice = 0.0;
                 Double avgNoBidders = 0.0;
-                Double avgNoConcAuctions = 0.0;
+                Double avgNoConcAuctions = (Math.random()*100) % 11;
                 Double avgStartingPrice = 0.0;
                 Double startingPrice = 0.0;
-                if( db.getFinalPrice(p.getName()) != null ){
-                    avgFinalPice = getAvg(db.getFinalPrice(p.getName()));
+                if( db.getAvgFinalPrice(p.getName()) != null ){
+                    avgFinalPice = getAvg(db.getAvgFinalPrice(p.getName()));
                 }
                 if( db.getAvgNoBidders(p.getName()) != null ){
                     avgNoBidders = getAvg(db.getAvgNoBidders(p.getName()));
@@ -130,7 +128,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         auctions = new ArrayList<>();
         wishlist = new ArrayList<>();
 
-        RANDOM_BOUND = (Math.random()*100) % 16;
+        RANDOM_BOUND = ((Math.random()*100) % 16)/100.0;
         int tempRandom = (int)(Math.random()*100) % 2;
         if( tempRandom == 0 )
             RANDOM_BOUND *= -1;
@@ -152,7 +150,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         }
 
         JLabel productPriceL = new JLabel("Product desired price:");
-        double min = 0.00, value = 0.00, max = Double.MAX_VALUE, stepSize = 0.01;
+        double min = 0.00, value = 0.00, max = Double.MAX_VALUE, stepSize = 1;
 
         SpinnerNumberModel model = new SpinnerNumberModel(value, min, max, stepSize);
         final JSpinner productPrice = new JSpinner(model);
@@ -182,6 +180,10 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         productEditPanel.add(productNameL);
         productEditPanel.add(productNames);
         productEditPanel.add(productPriceL);
+        if( this.type.equals("Pondered") ) {
+            productPriceL.setVisible(false);
+            productPrice.setVisible(false);
+        }
         productEditPanel.add(productPrice);
         productEditPanel.add(addProductWishlistButton);
         productEditPanel.add(askAuctionsButton);

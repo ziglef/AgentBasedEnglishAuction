@@ -8,7 +8,7 @@ public class Database {
 
     private static Database instance;
 
-    private Map<String, ArrayList<Double>> finalPrice;
+    private Map<String, ArrayList<Double>> avgFinalPrice;
     private Map<String, ArrayList<Double>> avgNoBidders;
     private Map<String, ArrayList<Double>> avgNoConcAuctions;
     private Map<String, ArrayList<Double>> avgStartingPrice;
@@ -23,21 +23,21 @@ public class Database {
 
     // Constructor called when no database exists //
     private Database() {
-        finalPrice = new HashMap<>();
+        avgFinalPrice = new HashMap<>();
         avgNoBidders = new HashMap<>();
         avgNoConcAuctions = new HashMap<>();
         avgStartingPrice = new HashMap<>();
     }
 
-    public ArrayList<Double> getFinalPrice(String product) { return finalPrice.get(product); }
+    public ArrayList<Double> getAvgFinalPrice(String product) { return avgFinalPrice.get(product); }
     public ArrayList<Double> getAvgNoBidders(String product) { return avgNoBidders.get(product); }
     public ArrayList<Double> getAvgNoConcAuctions(String product) { return avgNoConcAuctions.get(product); }
     public ArrayList<Double> getAvgStartingPrice(String product) { return avgStartingPrice.get(product); }
 
-    public void addFinalPrice(String product, Double value) {
-        ArrayList<Double> newFinalPrice = finalPrice.get(product);
+    public void addAvgFinalPrice(String product, Double value) {
+        ArrayList<Double> newFinalPrice = avgFinalPrice.get(product);
         newFinalPrice.add(value);
-        finalPrice.put(product, newFinalPrice);
+        avgFinalPrice.put(product, newFinalPrice);
     }
     public void addAvgNoBidders(String product, Double value) {
         ArrayList<Double> newAvgNoBidders = avgNoBidders.get(product);

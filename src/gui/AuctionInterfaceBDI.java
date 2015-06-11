@@ -1,6 +1,7 @@
 package gui;
 
 import auctions.Auction;
+import finalpriceprediction.Database;
 import jadex.bdiv3.BDIAgent;
 import jadex.bdiv3.annotation.Belief;
 import jadex.bridge.service.RequiredServiceInfo;
@@ -17,7 +18,6 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,10 +42,13 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
     private static final ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor();
     private Runnable task;
 
+    private Database db;
+
     @AgentBody
     public void body() {
         auctionAgent.waitForDelay(100).get();
 
+        db = Database.getInstance();
         productID = 0;
         actualProduct = 0;
         task = new Runnable() {
@@ -162,6 +165,11 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
     }
 
     private void startAuction() {
+        // Adicionar a base de dados os preços iniciais dos items
+        for( Product p : auction.getProducts() ){
+            db.addAvgStartingPrice( p.getName(), p.getStartingPrice() );
+        }
+
         // Avisar os agentes que existe um novo item a ser licitado
         sendNewItemBeingAuctioned();
 
@@ -220,6 +228,8 @@ public class AuctionInterfaceBDI implements ICommunicationFromBidderService {
                 {
                     public void intermediateResultAvailable(ICommunicationFromAuctionService ts) {
                         ts.receiveWinNotification(auctionAgent.getAgentName(), currentBidder, productName, currentPrice);
+                        db.addAvgFinalPrice(productName, currentPrice);
+                        db.addAvgNoBidders(productName, (double)auction.getParticipants().size());
                     }
                 });
     }
