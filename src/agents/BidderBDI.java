@@ -44,6 +44,10 @@ public class BidderBDI implements ICommunicationFromAuctionService {
     private DefaultTableModel auctionsTableModel;
     private DefaultTableModel productsWonTableModel;
 
+    private String type;
+    private double BOUND = 1.15;
+    private double RANDOM_BOUND;
+
     class WishListProduct {
 
         private String name;
@@ -66,12 +70,27 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         public void setDesirePrice(double desirePrice) { this.desirePrice = desirePrice; }
     }
 
+    public String getType(){ return this.type; }
+    public void setType(String type){
+        this.type = type;
+        if( type.equals("Pondered") ){
+            for( WishListProduct p : wishlist ){
+                p.setDesirePrice( calculateFP(p) );
+            }
+        }
+    }
+
     @AgentBody
     public void body() {
         bidderAgent.waitForDelay(100).get();
 
         auctions = new ArrayList<>();
         wishlist = new ArrayList<>();
+
+        RANDOM_BOUND = (Math.random()*100) % 16;
+        int tempRandom = (int)(Math.random()*100) % 2;
+        if( tempRandom == 0 )
+            RANDOM_BOUND *= -1;
 
         /* PRODUCT TAB - START */
         JPanel productEditPanel = new JPanel(new GridLayout(6, 1));
@@ -211,12 +230,18 @@ public class BidderBDI implements ICommunicationFromAuctionService {
 
     /* ICommunicationFromAuctionService */
 
-    private double BOUND = 1.25;
-
     private boolean checkIfItsWorthItToBuyProduct(double price, double desiredPrice) {
 
-        if (price <= desiredPrice * BOUND)
-            return true;
+        if( this.type.equals("Simple") ) {
+            if (price <= desiredPrice * BOUND)
+                return true;
+        } else if( this.type.equals("Random") ) {
+            if (price <= desiredPrice * RANDOM_BOUND)
+                return true;
+        } else if( this.type.equals("Pondered") ) {
+            if( price <= desiredPrice )
+                return true;
+        }
 
         return false;
     }

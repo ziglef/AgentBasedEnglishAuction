@@ -1,5 +1,6 @@
 package jadex;
 
+import agents.BidderBDI;
 import jadex.base.Starter;
 import jadex.bridge.IComponentIdentifier;
 import jadex.bridge.IExternalAccess;
@@ -48,15 +49,16 @@ public class Jadex {
         applicationIdentifier = cms.createComponent("application/EnglishAuction.application.xml", null).getFirstResult(sus);
     }
 
-    public boolean addNewBidderToApplication(DefaultTableModel biddersTableModel) {
+    public boolean addNewBidderToApplication(DefaultTableModel biddersTableModel, String bidderType) {
 
         if (applicationIdentifier != null) {
             ThreadSuspendable sus = new ThreadSuspendable();
 
             CreationInfo info = new CreationInfo(applicationIdentifier);
             IComponentIdentifier agentIdentifier = cms.createComponent("agents/BidderBDI.class", info).getFirstResult(sus);
+            ((BidderBDI)agentIdentifier).setType( bidderType );
             bidders.add(agentIdentifier);
-            biddersTableModel.addRow(new Object[]{agentIdentifier, agentIdentifier.getLocalName()});
+            biddersTableModel.addRow(new Object[]{agentIdentifier, agentIdentifier.getLocalName(), ((BidderBDI) agentIdentifier).getType()});
 
             return true;
         }

@@ -34,14 +34,20 @@ public class GeneralInterface extends JPanel{
 
         biddersTableModel.addColumn("ID");
         biddersTableModel.addColumn("Name");
+        biddersTableModel.addColumn("Type");
 
+        final CheckboxGroup agentTypes = new CheckboxGroup();
+        Checkbox agentSimple = new Checkbox("Simple", true, agentTypes);
+        Checkbox agentRandom = new Checkbox("Random", false, agentTypes);
+        Checkbox agentFPP = new Checkbox("Pondered", false, agentTypes);
 
         JButton createBidderButton = new JButton("Create Bidder");
         createBidderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (UserInterface.getInstance().getJadex().addNewBidderToApplication(biddersTableModel)) {
-                    System.out.println("Created new bidder");
+                String bidderType = agentTypes.getSelectedCheckbox().getLabel();
+                if (UserInterface.getInstance().getJadex().addNewBidderToApplication(biddersTableModel, bidderType)) {
+                    System.out.println("Created new bidder of type " + bidderType);
                 } else {
                     System.out.println("Failed to create new bidder");
                 }
@@ -87,8 +93,21 @@ public class GeneralInterface extends JPanel{
         buttonsPanel.add(bidderButtonPanel);
         buttonsPanel.add(auctionButtonPanel);
 
+        JPanel optionsPanel = new JPanel( new GridLayout(3, 1) );
+        optionsPanel.add(agentSimple);
+        optionsPanel.add(agentRandom);
+        optionsPanel.add(agentFPP);
+        optionsPanel.setPreferredSize( new Dimension(300, 100) );
+
+        JPanel agentsPanel = new JPanel( new GridLayout(2, 1) );
+
+        agentsPanel.add( optionsPanel );
+        agentsPanel.add( buttonsPanel );
+
         leftPanel.add( auctionImage );
-        leftPanel.add( buttonsPanel );
+        leftPanel.add( agentsPanel );
+
+        leftPanel.setPreferredSize( new Dimension(620, 1000) );
 
         JScrollPane biddersScrollPane = new JScrollPane(biddersTable);
         JScrollPane auctionsScrollTable = new JScrollPane(auctionsTable);
@@ -98,7 +117,7 @@ public class GeneralInterface extends JPanel{
 
         JPanel centerLeftPanel = new JPanel( new FlowLayout( FlowLayout.CENTER ));
         JLabel dummy = new JLabel();
-        dummy.setPreferredSize( new Dimension(700, 115) );
+        dummy.setPreferredSize( new Dimension(100, 115) );
         centerLeftPanel.add( dummy );
         centerLeftPanel.add(leftPanel);
 
