@@ -94,29 +94,34 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         return avg / values.size();
     }
 
+    public double calculatePrice( WishListProduct p ){
+        Double avgFinalPice = 0.0;
+        Double avgNoBidders = 0.0;
+        Double avgNoConcAuctions = ((Math.random()*100) % 10)+1;
+        Double avgStartingPrice = 0.0;
+        Double startingPrice = 0.0;
+        if( db.getAvgFinalPrice(p.getName()) != null ){
+            avgFinalPice = getAvg(db.getAvgFinalPrice(p.getName()));
+        }
+        if( db.getAvgNoBidders(p.getName()) != null ){
+            avgNoBidders = getAvg(db.getAvgNoBidders(p.getName()));
+        }
+        if( db.getAvgNoConcAuctions(p.getName()) != null ){
+            avgNoConcAuctions = getAvg(db.getAvgNoConcAuctions(p.getName()));
+        }
+        if( db.getAvgStartingPrice(p.getName()) != null ){
+            avgStartingPrice = getAvg(db.getAvgStartingPrice(p.getName()));
+        }
+        p.setDesirePrice( fpp.calculateFinalPrice(avgFinalPice, avgNoBidders, avgNoConcAuctions, avgStartingPrice, startingPrice) );
+        return fpp.calculateFinalPrice(avgFinalPice, avgNoBidders, avgNoConcAuctions, avgStartingPrice, startingPrice);
+    }
+
     public String getType(){ return this.type; }
     public void setType(String type){
         this.type = type;
         if( type.equals("Pondered") ){
             for( WishListProduct p : wishlist ){
-                Double avgFinalPice = 0.0;
-                Double avgNoBidders = 0.0;
-                Double avgNoConcAuctions = ((Math.random()*100) % 10)+1;
-                Double avgStartingPrice = 0.0;
-                Double startingPrice = 0.0;
-                if( db.getAvgFinalPrice(p.getName()) != null ){
-                    avgFinalPice = getAvg(db.getAvgFinalPrice(p.getName()));
-                }
-                if( db.getAvgNoBidders(p.getName()) != null ){
-                    avgNoBidders = getAvg(db.getAvgNoBidders(p.getName()));
-                }
-                if( db.getAvgNoConcAuctions(p.getName()) != null ){
-                    avgNoConcAuctions = getAvg(db.getAvgNoConcAuctions(p.getName()));
-                }
-                if( db.getAvgStartingPrice(p.getName()) != null ){
-                    avgStartingPrice = getAvg(db.getAvgStartingPrice(p.getName()));
-                }
-                p.setDesirePrice( fpp.calculateFinalPrice(avgFinalPice, avgNoBidders, avgNoConcAuctions, avgStartingPrice, startingPrice) );
+                calculatePrice( p );
             }
         }
     }
@@ -161,8 +166,12 @@ public class BidderBDI implements ICommunicationFromAuctionService {
             public void actionPerformed(ActionEvent e) {
                 String productName = productNames.getSelectedItem().toString();
                 double desiredPrice = (double)productPrice.getValue();
+                if( type.equals("Random") )
+                    desiredPrice += desiredPrice*RANDOM_BOUND;
+                else if( type.equals("Pondered") )
+                    desiredPrice = calculatePrice( new WishListProduct(productName, 0.0) );
 
-                if (!wishlistContains(productName, desiredPrice)) {
+                if (!wishlistContains(productName)) {
                     productsTableModel.addRow(new Object[]{productName, desiredPrice});
                     wishlist.add(new WishListProduct(productName, desiredPrice));
                 }
@@ -286,7 +295,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
             if (price <= desiredPrice * BOUND)
                 return true;
         } else if( this.type.equals("Random") ) {
-            if (price <= desiredPrice * RANDOM_BOUND)
+            if (price <= desiredPrice)
                 return true;
         } else if( this.type.equals("Pondered") ) {
             if( price <= desiredPrice )
