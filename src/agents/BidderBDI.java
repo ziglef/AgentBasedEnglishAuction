@@ -59,14 +59,26 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         private String name;
         private double desirePrice;
 
+        public double getStartingPrice() {
+            return startingPrice;
+        }
+
+        public void setStartingPrice(double startingPrice) {
+            this.startingPrice = startingPrice;
+        }
+
+        private double startingPrice;
+
         public WishListProduct(String name) {
             this.name = name;
-            desirePrice = 0.0;
+            this.desirePrice = 0.0;
+            this.startingPrice = 0.0;
         }
 
         public WishListProduct(String name, double price) {
             this.name = name;
-            desirePrice = price;
+            this.desirePrice = price;
+            this.startingPrice = 0.0;
         }
 
         public String getName() { return name; }
@@ -288,7 +300,8 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         for (Product product : products) {
             for (WishListProduct wishProduct : wishlist) {
                 if (wishProduct.getName().equals(product.getName())) {
-
+                    wishProduct.setStartingPrice( product.getStartingPrice() );
+                    if( this.type.equals("Pondered") ) this.setType("Pondered");
                     if (checkIfItsWorthItToBuyProduct(product.getStartingPrice(), wishProduct.getDesirePrice())) {
                         System.out.println("Product: " + product.getName() + " Price: " + product.getStartingPrice());
                         System.out.println("Adding auction: " + auction);
