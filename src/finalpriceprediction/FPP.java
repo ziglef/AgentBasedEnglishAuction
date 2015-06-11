@@ -1,7 +1,5 @@
 package finalpriceprediction;
 
-import org.apache.xpath.SourceTree;
-
 /**
  * Created on 04/06/15.
  *
@@ -10,7 +8,7 @@ import org.apache.xpath.SourceTree;
  *
  * alpha = MIN(AvgNumberOfBidders/10, 1) * 0.15
  * beta = MIN(AvgNumberOfConcurrentAuctions/10, 1) * (-0.15)
- * gamma = (asp - sp) * 0.7
+ * gamma = (asp - sp) * 0.6
  * fp = avp + alpha * avp + beta * avp + gamma
  *
  */
@@ -42,5 +40,9 @@ public class FPP {
 
     public double calculateFinalPrice(double averageFinalPrice, double averageNumberOfBidders, double averageNumberOfConcurrentAuctions, double averageStartingPrice, double startingPrice) {
         return Math.max(averageFinalPrice, startingPrice) + averageFinalPrice * calculateAlpha(averageNumberOfBidders) + averageFinalPrice * calculateBeta(averageNumberOfConcurrentAuctions) + calculateGama(averageStartingPrice, startingPrice);
+    }
+
+    public FPP(){
+
     }
 }

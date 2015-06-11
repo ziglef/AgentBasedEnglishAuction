@@ -1,6 +1,8 @@
 package agents;
 
 
+import finalpriceprediction.Database;
+import finalpriceprediction.FPP;
 import gui.UserInterface;
 import jadex.bdiv3.BDIAgent;
 import jadex.bridge.service.RequiredServiceInfo;
@@ -14,10 +16,12 @@ import services.ICommunicationFromBidderService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -47,6 +51,8 @@ public class BidderBDI implements ICommunicationFromAuctionService {
     private String type;
     private double BOUND = 1.15;
     private double RANDOM_BOUND;
+    private FPP fpp;
+    private Database db;
 
     class WishListProduct {
 
@@ -70,12 +76,37 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         public void setDesirePrice(double desirePrice) { this.desirePrice = desirePrice; }
     }
 
+    private Double getAvg(ArrayList<Double> values){
+        Double avg = 0.0;
+        for(Double d : values){
+            avg += d;
+        }
+        return avg / values.size();
+    }
+
     public String getType(){ return this.type; }
     public void setType(String type){
         this.type = type;
         if( type.equals("Pondered") ){
             for( WishListProduct p : wishlist ){
-                p.setDesirePrice( calculateFP(p) );
+                Double avgFinalPice = 0.0;
+                Double avgNoBidders = 0.0;
+                Double avgNoConcAuctions = 0.0;
+                Double avgStartingPrice = 0.0;
+                Double startingPrice = 0.0;
+                if( db.getFinalPrice(p.getName()) != null ){
+                    avgFinalPice = getAvg(db.getFinalPrice(p.getName()));
+                }
+                if( db.getAvgNoBidders(p.getName()) != null ){
+                    avgNoBidders = getAvg(db.getAvgNoBidders(p.getName()));
+                }
+                if( db.getAvgNoConcAuctions(p.getName()) != null ){
+                    avgNoConcAuctions = getAvg(db.getAvgNoConcAuctions(p.getName()));
+                }
+                if( db.getAvgStartingPrice(p.getName()) != null ){
+                    avgStartingPrice = getAvg(db.getAvgStartingPrice(p.getName()));
+                }
+                p.setDesirePrice( fpp.calculateFinalPrice(avgFinalPice, avgNoBidders, avgNoConcAuctions, avgStartingPrice, startingPrice) );
             }
         }
     }
@@ -91,6 +122,11 @@ public class BidderBDI implements ICommunicationFromAuctionService {
         int tempRandom = (int)(Math.random()*100) % 2;
         if( tempRandom == 0 )
             RANDOM_BOUND *= -1;
+
+        db = Database.getInstance();
+
+        fpp = new FPP();
+        this.setType((String)bidderAgent.getArgument("type"));
 
         /* PRODUCT TAB - START */
         JPanel productEditPanel = new JPanel(new GridLayout(6, 1));

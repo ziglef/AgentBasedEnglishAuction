@@ -12,7 +12,9 @@ import jadex.commons.future.ThreadSuspendable;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created on 28/05/15.
@@ -26,8 +28,8 @@ public class Jadex {
     private static IComponentManagementService cms;
     private static IComponentIdentifier applicationIdentifier;
 
-    private static List<IComponentIdentifier> bidders = new ArrayList<IComponentIdentifier>();
-    private static List<IComponentIdentifier> auctions = new ArrayList<IComponentIdentifier>();
+    private static List<IComponentIdentifier> bidders = new ArrayList<>();
+    private static List<IComponentIdentifier> auctions = new ArrayList<>();
 
     public Jadex () {
 
@@ -54,11 +56,13 @@ public class Jadex {
         if (applicationIdentifier != null) {
             ThreadSuspendable sus = new ThreadSuspendable();
 
-            CreationInfo info = new CreationInfo(applicationIdentifier);
+            HashMap<String, Object> type = new HashMap<>();
+            type.put("type", bidderType);
+
+            CreationInfo info = new CreationInfo(type, applicationIdentifier);
             IComponentIdentifier agentIdentifier = cms.createComponent("agents/BidderBDI.class", info).getFirstResult(sus);
-            ((BidderBDI)agentIdentifier).setType( bidderType );
             bidders.add(agentIdentifier);
-            biddersTableModel.addRow(new Object[]{agentIdentifier, agentIdentifier.getLocalName(), ((BidderBDI) agentIdentifier).getType()});
+            biddersTableModel.addRow(new Object[]{agentIdentifier, agentIdentifier.getLocalName(), bidderType});
 
             return true;
         }
