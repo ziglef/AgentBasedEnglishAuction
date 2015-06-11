@@ -101,7 +101,7 @@ public class BidderBDI implements ICommunicationFromAuctionService {
             for( WishListProduct p : wishlist ){
                 Double avgFinalPice = 0.0;
                 Double avgNoBidders = 0.0;
-                Double avgNoConcAuctions = (Math.random()*100) % 11;
+                Double avgNoConcAuctions = ((Math.random()*100) % 10)+1;
                 Double avgStartingPrice = 0.0;
                 Double startingPrice = 0.0;
                 if( db.getAvgFinalPrice(p.getName()) != null ){
